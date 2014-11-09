@@ -1,0 +1,54 @@
+﻿@model TopPost.Models.Post
+
+@{
+    ViewBag.Title = "Show";
+}
+
+@Html.Partial("_CommentPartial")
+
+<div>
+    <div class="dl-horizontal col-md-6" style="text-align:center">
+        <h2>
+            @Html.DisplayNameFor(model => model.Title):
+            @Html.DisplayFor(model => model.Title)
+        </h2>
+        <div>
+            <img src="@Model.ImageUrl" />
+            <div>
+                @Html.Partial("_LikePartial")
+                Score: @Html.Action("GetScore", "Likes", new { postId = Model.Id })
+            </div>
+        </div>
+
+        <b>@Html.DisplayNameFor(model => model.Description)</b>
+        <p>
+            @Html.DisplayFor(model => model.Description)
+        </p>
+        <div>
+            @Html.DisplayNameFor(model => model.Author):
+            @Html.DisplayFor(model => model.Author.UserName)
+        </div>
+
+        <div>
+            @Html.DisplayNameFor(model => model.Category)
+            @Html.DisplayFor(model => model.Category.Name)
+        </div>
+
+        <div>
+            @Html.DisplayNameFor(model => model.Created)
+            @Html.DisplayFor(model => model.Created)
+        </div>
+    </div>
+</div>
+<h2>
+    <a class="btn btn-primary" onclick="showDialogComment()">Comment</a>
+</h2>
+
+<h2>@Html.LabelFor(c => c.Comments):</h2>
+@for (int i = 0; i < Model.Comments.Count; i++)
+{
+    <div>
+        @Html.DisplayTextFor(c => c.Comments.ToList()[i].Author.UserName):
+        @Html.DisplayTextFor(c => c.Comments.ToList()[i].Text)
+    </div>
+}

@@ -1,0 +1,17 @@
+﻿<script>
+    function showDialogComment() {
+        $("#dialogComment").dialog({ width: 330, height: 230, title: "Submit Comment", resizable: false });
+    };
+</script>
+@model TopPost.Models.Post
+
+<div id="dialogComment" title="Submit content" hidden="hidden" style="text-align:center">
+    @using (Html.BeginForm("Post", "Comments", FormMethod.Post,
+                    new { enctype = "multipart/form-data" }))
+    {
+        @Html.TextArea("Text", new { rows = "6", cols = "200", resize = "none" })
+        @Html.Hidden("PostId", Model.Id)
+
+        <input type="submit" value="Comment" class="btn-default" />
+    }
+</div>

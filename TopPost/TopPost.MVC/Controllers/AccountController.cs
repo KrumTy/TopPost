@@ -9,6 +9,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using TopPost.MVC.Models;
+using TopPost.Models;
 
 namespace TopPost.MVC.Controllers
 {

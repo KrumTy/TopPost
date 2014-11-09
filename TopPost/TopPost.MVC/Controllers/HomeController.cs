@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using TopPost.Data;
+using TopPost.Models;
 
 namespace TopPost.MVC.Controllers
 {
@@ -24,6 +27,11 @@ namespace TopPost.MVC.Controllers
         {
             ViewBag.Message = "Your contact page.";
 
+            return View();
+        }        
+
+        public ActionResult Display()
+        {
             return View();
         }
     }

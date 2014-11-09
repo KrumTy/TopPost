@@ -1,0 +1,30 @@
+﻿
+@{
+    ViewBag.Title = "Display";
+}
+
+@{
+    TopPost.Data.ApplicationSystemData db = new TopPost.Data.ApplicationSystemData();
+}
+@using (Html.BeginForm())
+{
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>First name</th>
+                <th>Last name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in db.Posts.All())
+            {
+                <tr>
+                    <td><img src="@item.ImageUrl" width="100" height="100" /></td>
+                    <td>@item.Title</td>
+                    <td>@item.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

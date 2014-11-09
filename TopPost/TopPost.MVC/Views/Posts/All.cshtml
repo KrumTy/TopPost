@@ -1,0 +1,84 @@
+﻿@model List<TopPost.Models.Post>
+
+@{
+    ViewBag.Title = "All";
+}
+
+<h2>All</h2>
+
+@{
+    TopPost.MVC.Models.SortingPagingInfo info = ViewBag.SortingPagingInfo;
+}
+
+@using (Html.BeginForm("All", "Posts", FormMethod.Post))
+{
+    @Html.Hidden("SortField", info.SortField)
+    @Html.Hidden("SortDirection", info.SortDirection)
+    @Html.Hidden("PageCount", info.PageCount)
+    @Html.Hidden("PageSize", info.PageSize)
+    @Html.Hidden("CurrentPageIndex", info.CurrentPageIndex)
+
+    @Html.Label("showPagesList", "Show:")
+    @Html.DropDownList("showPagesList", TopPost.MVC.Models.SortingPagingInfo.ShowPagesList(info.PageSize.ToString()), info.PageSize.ToString(), new { @Class = "btn btn-default dropdown-toggle" })
+    @Html.Label("sortBy", "Sort by:")
+    @Html.DropDownList("sortBy", TopPost.MVC.Models.SortingPagingInfo.SortByList(info.SortField), info.SortField, new { @Class = "btn btn-default dropdown-toggle" })
+    @Html.Label("orderBy", "Order:")
+    @Html.DropDownList("orderBy", TopPost.MVC.Models.SortingPagingInfo.OrderByList(info.SortDirection), info.SortDirection, new { @Class = "btn btn-default dropdown-toggle" })
+    
+    <div class="pagination-container">
+        <ul class="pagination">
+            @for (int i = 0; i <= info.PageCount; i++)
+            {
+                if (i == info.CurrentPageIndex)
+                {
+                    <li class="active pageSelect"><a>@(i + 1)</a></li>
+                }
+                else
+                {
+                    <li value="@i" class="pageSelect"><a value="@i">@(i + 1)</a></li>
+                }
+            }
+        </ul>
+    </div>
+
+    foreach (var item in Model)
+    {                                                   
+        <a href="Show/@item.Id" class="thumbnail-container">
+            <div>@item.Title</div>
+            <div>
+                <img src="@item.ThumbnailUrl" width="180px" height="180px" />
+            </div>
+        </a>
+    }
+}
+
+<script>
+    $(document).ready(function () {
+
+        $("#showPagesList").change(function (evt) {
+            filter("#PageSize", evt);
+        });
+
+        $("#sortBy").change(function (evt) {
+            filter("#SortField", evt);
+        });
+
+        $("#orderBy").change(function (evt) {
+            filter("#SortDirection", evt);
+        });
+
+        var filter = function (target, evt) {
+            var change = $(evt.target).val();
+            $(target).val(change);
+            evt.preventDefault();
+            $("form").submit();
+        }
+
+        $(".pageSelect").click(function (evt) {
+            var pages = $(evt.target).text();
+            $("#CurrentPageIndex").val(pages - 1);
+            evt.preventDefault();
+            $("form").submit();
+        });
+    });
+</script>

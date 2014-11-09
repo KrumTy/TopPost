@@ -6,6 +6,8 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Google;
 using Owin;
 using TopPost.MVC.Models;
+using TopPost.Models;
+using TopPost.Data;
 
 namespace TopPost.MVC
 {

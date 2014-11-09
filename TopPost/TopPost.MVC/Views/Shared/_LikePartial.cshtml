@@ -1,0 +1,21 @@
+﻿@model TopPost.Models.Post
+
+@{
+    string vote = Html.Action("GetCurrentUserValue", "Likes", new { PostId = Model.Id }).ToString();
+}
+
+@if (vote == "Up")
+{
+    @Html.ActionLink("Liked", "Unvote", "Likes", new { PostId = Model.Id }, new { @Class = "btn btn-info" })
+    @Html.ActionLink("Dislike", "Vote", "Likes", new { Value = false, PostId = Model.Id }, new { @Class = "btn btn-default" })
+}
+else if (vote == "Down")
+{
+    @Html.ActionLink("Like", "Vote", "Likes", new { Value = true, PostId = Model.Id }, new { @Class = "btn btn-default" })
+    @Html.ActionLink("Disliked", "Unvote", "Likes", new { PostId = Model.Id }, new { @Class = "btn btn-danger" })
+}
+else
+{
+    @Html.ActionLink("Like", "Vote", "Likes", new { Value = true, PostId = Model.Id }, new { @Class = "btn btn-default" })
+    @Html.ActionLink("Dislike", "Vote", "Likes", new { Value = false, PostId = Model.Id }, new { @Class = "btn btn-default" })
+}
