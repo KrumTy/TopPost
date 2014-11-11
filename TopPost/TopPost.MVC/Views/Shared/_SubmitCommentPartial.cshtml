@@ -1,0 +1,18 @@
+﻿<script>
+    function showDialogSubComment() {
+        $("#dialogSubComment").dialog({ width: 330, height: 230, title: "Submit new Comment", resizable: false });
+    };
+</script>
+@model TopPost.Models.Comment
+
+@using (Html.BeginForm("Post", "Comments", FormMethod.Post,
+                    new { enctype = "multipart/form-data" }))
+{
+    @Html.TextArea("Text", new { rows = "6", cols = "200", resize = "none" })
+    @Html.Hidden("PostId", Model.PostId)
+    if (Model.Author != null)
+    {
+        @Html.Hidden("ParentCommentId", Model.Id)
+    }
+    <input type="submit" value="Comment" class="btn-default" />
+}

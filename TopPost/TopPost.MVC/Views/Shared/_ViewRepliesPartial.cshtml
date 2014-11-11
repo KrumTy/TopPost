@@ -1,0 +1,48 @@
+﻿@model IEnumerable<TopPost.Models.Comment>
+
+@if (Model.Count() > 0)
+{
+    var comments = Model.ToList();
+
+    <div id="comments@((comments[0].ParentCommentId != null)? "-" + comments[0].ParentCommentId : string.Empty)" style="padding-left:10px;">
+        @for (int i = 0; i < comments.Count; i++)
+        {
+            <div id="@Model.ToList()[i].Id">
+                @Html.DisplayTextFor(c => c.ToList()[i].Author.UserName):
+                @Html.ActionLink("Profile", "Profiles", "User", new { username = comments[i].Author.UserName}, null)
+                @Html.DisplayTextFor(c => c.ToList()[i].Text)
+                @Ajax.ActionLink("reply", "GetReplyPartial", "Comments", new { commentId = comments[i].Id },
+                new AjaxOptions
+                {
+                    InsertionMode = InsertionMode.Replace,
+                    HttpMethod = "GET",
+                    OnComplete = "showDialogSubComment()",
+                    UpdateTargetId = "dialogSubComment"
+                }, new { @Class = "label label-info" })
+                @if (comments[i].Comments.Count != 0)
+                {
+                    @Ajax.ActionLink(string.Format("replies ({0})", comments[i].Comments.Count), "GetComments", "Comments", new { commentId = comments[i].Id },
+                new AjaxOptions
+                {
+                    InsertionMode = InsertionMode.InsertAfter,
+                    HttpMethod = "GET",
+                    OnComplete = string.Format("hideShowReplies({0})", comments[i].Id),
+                    UpdateTargetId = @comments[i].Id.ToString()
+                }, new { @Class = "label label-primary", id = string.Format("btn-show-replies-{0}", comments[i].Id) })
+                    <a id="btn-hide-replies-@comments[i].Id" href="#" onclick="hideReplies(@comments[i].Id)" style="display:none" class="label label-default">hide</a>
+                }
+            </div>
+        }
+    </div>
+    <script>
+        function hideReplies(id) {
+            $("#comments-" + id).remove();
+            $("#btn-hide-replies-" + id).hide();
+            $("#btn-show-replies-" + id).show();
+        };
+        function hideShowReplies(id) {
+            $("#btn-hide-replies-" + id).show();
+            $("#btn-show-replies-" + id).hide();
+        };
+    </script>
+}

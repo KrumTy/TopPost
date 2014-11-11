@@ -12,6 +12,7 @@
         private ICollection<Post> posts;
         private ICollection<Comment> comments;
         private ICollection<Like> likes;
+        private ICollection<Favorite> favorites;
 
 
         public ApplicationUser()
@@ -20,6 +21,7 @@
             this.posts = new HashSet<Post>();
             this.comments = new HashSet<Comment>();
             this.likes = new HashSet<Like>();
+            this.favorites = new HashSet<Favorite>();
         }
 
         public virtual ICollection<Post> Posts
@@ -38,6 +40,12 @@
         {
             get { return this.likes; }
             set { this.likes = value; }
+        }
+
+        public virtual ICollection<Favorite> Favorites
+        {
+            get { return this.favorites; }
+            set { this.favorites = value; }
         }
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)

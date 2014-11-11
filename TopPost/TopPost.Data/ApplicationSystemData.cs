@@ -48,6 +48,16 @@
             get { return this.GetRepository<Like>(); }
         }
 
+        public IRepository<Favorite> Favorites
+        {
+            get { return this.GetRepository<Favorite>(); }
+        }
+
+        public IRepository<Tag> Tags
+        {
+            get { return this.GetRepository<Tag>(); }
+        }
+
         public IRepository<ApplicationUser> Users
         {
             get { return this.GetRepository<ApplicationUser>(); }

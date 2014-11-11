@@ -23,5 +23,7 @@
         public IDbSet<Post> Posts { get; set; }
         public IDbSet<Comment> Comments { get; set; }
         public IDbSet<Like> Likes { get; set; }
+        public IDbSet<Favorite> Favorites { get; set; }
+        public IDbSet<Tag> Tags { get; set; }
     }
 }

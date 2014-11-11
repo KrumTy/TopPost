@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "Show Profile";
+    var username = ViewBag.username;
+}
+
+<h2>@username's profile</h2>
+
+@Ajax.ActionLink("show Favorites", "GetUserFavorites", "Favorites", new { username = username },
+    new AjaxOptions
+    {
+        InsertionMode = InsertionMode.Replace,
+        HttpMethod = "GET",
+        UpdateTargetId = "posts-bar",
+        OnComplete = "DisableBtn(fovoritesButton)"
+    },
+    new { @Class = "btn btn-default", id = "fovoritesButton" })
+
+@Ajax.ActionLink("show Likes", "GetUserLikes", "Likes", new { username = username },
+    new AjaxOptions
+    {
+        InsertionMode = InsertionMode.Replace,
+        HttpMethod = "GET",
+        UpdateTargetId = "posts-bar",
+        OnComplete = "DisableBtn(likesButton)"
+    },
+    new { @Class = "btn btn-default", id="likesButton" })
+
+@Ajax.ActionLink("show Posts", "GetUserPosts", "Posts", new { username = username },
+    new AjaxOptions
+    {
+        InsertionMode = InsertionMode.Replace,
+        HttpMethod = "GET",
+        UpdateTargetId = "posts-bar",
+        OnComplete = "DisableBtn(postsButton)"
+    },
+    new { @Class = "btn btn-default", id = "postsButton" })
+
+<div id="posts-bar"></div>
+
+<script>
+    var DisableBtn = function (ev) {
+        $(".btn").removeClass("disabled");
+        $(ev).addClass("disabled");
+    }
+</script>

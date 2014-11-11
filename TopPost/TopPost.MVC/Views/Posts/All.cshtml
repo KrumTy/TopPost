@@ -17,14 +17,31 @@
     @Html.Hidden("PageCount", info.PageCount)
     @Html.Hidden("PageSize", info.PageSize)
     @Html.Hidden("CurrentPageIndex", info.CurrentPageIndex)
+    @Html.Hidden("TitleFilter", info.TitleFilter)
 
-    @Html.Label("showPagesList", "Show:")
-    @Html.DropDownList("showPagesList", TopPost.MVC.Models.SortingPagingInfo.ShowPagesList(info.PageSize.ToString()), info.PageSize.ToString(), new { @Class = "btn btn-default dropdown-toggle" })
-    @Html.Label("sortBy", "Sort by:")
-    @Html.DropDownList("sortBy", TopPost.MVC.Models.SortingPagingInfo.SortByList(info.SortField), info.SortField, new { @Class = "btn btn-default dropdown-toggle" })
-    @Html.Label("orderBy", "Order:")
-    @Html.DropDownList("orderBy", TopPost.MVC.Models.SortingPagingInfo.OrderByList(info.SortDirection), info.SortDirection, new { @Class = "btn btn-default dropdown-toggle" })
-    
+    <div class="row" style="text-align:center">
+        <div class="col-md-2">
+            @Html.Label("showPagesList", "Show:")
+            <br />
+            @Html.DropDownList("showPagesList", TopPost.MVC.Models.SortingPagingInfo.ShowPagesList(info.PageSize.ToString()), info.PageSize.ToString(), new { @Class = "btn btn-default dropdown-toggle" })
+        </div>
+        <div class="col-md-2">
+            @Html.Label("sortBy", "Sort by:")
+            <br />
+            @Html.DropDownList("sortBy", TopPost.MVC.Models.SortingPagingInfo.SortByList(info.SortField), info.SortField, new { @Class = "btn btn-default dropdown-toggle" })
+        </div>
+        <div class="col-md-2">
+            @Html.Label("orderBy", "Order:")
+            <br />
+            @Html.DropDownList("orderBy", TopPost.MVC.Models.SortingPagingInfo.OrderByList(info.SortDirection), info.SortDirection, new { @Class = "btn btn-default dropdown-toggle" })
+        </div>
+        <div class="col-md-2">
+            @Html.Label("titleFilter", "Filter:")
+            <br />
+            @Html.TextBox("titleFilter", null, new { @Class = "input-sm", style = "width:100px;" })
+            <input type="submit" value="Filter" class="btn btn-default" />
+        </div>
+    </div>
     <div class="pagination-container">
         <ul class="pagination">
             @for (int i = 0; i <= info.PageCount; i++)
@@ -42,7 +59,7 @@
     </div>
 
     foreach (var item in Model)
-    {                                                   
+    {
         <a href="Show/@item.Id" class="thumbnail-container">
             <div>@item.Title</div>
             <div>
@@ -50,10 +67,20 @@
             </div>
         </a>
     }
+
+    if (Model.Count == 0)
+    {
+        <h2>
+            No results
+        </h2>
+    }
 }
 
 <script>
     $(document).ready(function () {
+        $("#titleFilter").change(function (evt) {
+            filter("#TitleFilter", evt);
+        });
 
         $("#showPagesList").change(function (evt) {
             filter("#PageSize", evt);

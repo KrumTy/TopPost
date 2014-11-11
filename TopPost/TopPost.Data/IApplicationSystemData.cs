@@ -3,7 +3,7 @@
     using TopPost.Data.Repositories;
     using TopPost.Models;
 
-    interface IApplicationSystemData
+    public interface IApplicationSystemData
     {
         IRepository<Post> Posts { get; }
         IRepository<Category> Categories { get; }

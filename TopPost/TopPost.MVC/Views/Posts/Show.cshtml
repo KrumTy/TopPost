@@ -4,19 +4,21 @@
     ViewBag.Title = "Show";
 }
 
-@Html.Partial("_CommentPartial")
-
 <div>
-    <div class="dl-horizontal col-md-6" style="text-align:center">
+    <div class="dl-horizontal col-md-8" style="text-align:center">
         <h2>
             @Html.DisplayNameFor(model => model.Title):
             @Html.DisplayFor(model => model.Title)
         </h2>
         <div>
-            <img src="@Model.ImageUrl" />
-            <div>
-                @Html.Partial("_LikePartial")
-                Score: @Html.Action("GetScore", "Likes", new { postId = Model.Id })
+            @Html.ActionLink("Previous", "Show", "Posts", new { id = Model.Id - 1 }, new { @Class = "btn btn-default" })
+            <img src="@Model.ImageUrl" style="max-width:400px;"/>
+            @Html.ActionLink("Next", "Show", "Posts", new { id = Model.Id + 1 }, new { @Class = "btn btn-default" })
+            <div id="likes-bar">
+                @Html.Action("GetLikes", "Likes", new { postId = Model.Id })
+            </div>
+            <div id="fav-bar">
+                @Html.Action("GetFavoriteButton", "Favorites", new { postId = Model.Id })
             </div>
         </div>
 
@@ -39,16 +41,18 @@
             @Html.DisplayFor(model => model.Created)
         </div>
     </div>
-</div>
-<h2>
-    <a class="btn btn-primary" onclick="showDialogComment()">Comment</a>
-</h2>
+    <div class="dl-horizontal col-md-4">
+        @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = Model.Id },
+                new AjaxOptions
+                {
+                    InsertionMode = InsertionMode.Replace,
+                    HttpMethod = "GET",
+                    OnComplete = "showDialogSubComment()",
+                    UpdateTargetId = "dialogSubComment"
+                }, new { @Class = "btn btn-info" })
 
-<h2>@Html.LabelFor(c => c.Comments):</h2>
-@for (int i = 0; i < Model.Comments.Count; i++)
-{
-    <div>
-        @Html.DisplayTextFor(c => c.Comments.ToList()[i].Author.UserName):
-        @Html.DisplayTextFor(c => c.Comments.ToList()[i].Text)
+        <h2>@Html.LabelFor(c => c.Comments):</h2>
+        @Html.Action("GetPostComments", "Comments", new { postId = Model.Id })
+        <div id="dialogSubComment" style="text-align:center"></div>
     </div>
-}
+</div>

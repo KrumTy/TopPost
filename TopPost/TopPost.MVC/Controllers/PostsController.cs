@@ -71,33 +71,41 @@ namespace TopPost.MVC.Controllers
             {
                 info = SortingPagingInfo.Default();
             }
-            info.PageCount = Convert.ToInt32(Math.Ceiling((double)(db.Posts.All().Count() / info.PageSize)));
 
-            IQueryable<Post> posts = null;
+            var posts = db.Posts.All();
+            if (info.TitleFilter != null)
+            {
+                posts = posts.Where(p => p.Title.Contains(info.TitleFilter));
+            }
+
+            info.PageCount = (posts.Count() / info.PageSize);
+
             switch (info.SortField)
             {
                 case "Title":
                     posts = (info.SortDirection == "Ascending" ?
-                    db.Posts.All().OrderBy(c => c.Title) :
-                    db.Posts.All().OrderByDescending(c => c.Title));
+                    posts.OrderBy(c => c.Title) :
+                    posts.OrderByDescending(c => c.Title));
                     break;
                 case "Description":
                     posts = (info.SortDirection == "Ascending" ?
-                    db.Posts.All().OrderBy(c => c.Description) :
-                    db.Posts.All().OrderByDescending(c => c.Description));
+                    posts.OrderBy(c => c.Description) :
+                    posts.OrderByDescending(c => c.Description));
                     break;
                 case "Created":
                     posts = (info.SortDirection == "Ascending" ?
-                    db.Posts.All().OrderBy(c => c.Created) :
-                    db.Posts.All().OrderByDescending(c => c.Created));
+                    posts.OrderBy(c => c.Created) :
+                    posts.OrderByDescending(c => c.Created));
                     break;
             }
 
-            ViewBag.SortingPagingInfo = info;
             if (info.CurrentPageIndex * info.PageSize > posts.Count())
             {
                 info.CurrentPageIndex = 0;
             }
+
+            ViewBag.SortingPagingInfo = info;
+
             posts = posts.Skip(info.CurrentPageIndex * info.PageSize).Take(info.PageSize);
             List<Post> model = posts.ToList();
 
@@ -111,6 +119,20 @@ namespace TopPost.MVC.Controllers
             return View(post); // TODO: Models
         }
 
+        public ActionResult GetUserPosts(string username)
+        {
+            var user = this.db.Users.All().FirstOrDefault(u => u.UserName == username);
+
+            if (user == null)
+            {
+                user = this.GetUser();
+            }
+
+            var posts = user.Posts.ToList();
+
+            return PartialView("_ViewPostsPartial", posts);
+        }
+
         public ActionResult FileUpload(Post post, HttpPostedFileBase file)
         {
             if (file != null && ModelState.IsValid)
@@ -120,11 +142,14 @@ namespace TopPost.MVC.Controllers
                 post.ThumbnailUrl = urls[1];
                 post.CategoryId = 1;
 
-                db.Posts.Add(post);
+                var user = this.GetUser();
+                user.Posts.Add(post);
+
+                db.Users.Update(user);
                 db.SaveChanges();
             }
 
-            return RedirectToAction("../home/Display/");
+            return RedirectToAction("Show", "Posts", new { id = post.Id});
         }
     }
 }

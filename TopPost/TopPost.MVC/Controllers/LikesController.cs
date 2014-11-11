@@ -16,6 +16,19 @@ namespace TopPost.MVC.Controllers
             return View();
         }
 
+        public ActionResult GetLikes(int postId)
+        {
+            var userId = this.GetUser().Id;
+            var like = this.db.Posts.Find(postId).Likes.FirstOrDefault(x => x.UserId == userId);
+
+            if (like == null)
+            {
+                like = new Like() { PostId = postId };
+            }
+
+            return PartialView("_LikePartial", like);
+        }
+
         public ActionResult Vote(Like vote)
         {
             vote.UserId = this.GetUser().Id;
@@ -26,7 +39,7 @@ namespace TopPost.MVC.Controllers
             this.db.Likes.Add(vote);
             db.SaveChanges();
 
-            return RedirectToAction("Show", "Posts", new { id = vote.PostId }); // TODO: Fix redirection
+            return PartialView("_LikePartial", vote);
         }
 
         public ActionResult Unvote(int postId)
@@ -35,7 +48,9 @@ namespace TopPost.MVC.Controllers
 
             UnvoteIfPosible(postId, post);
 
-            return RedirectToAction("Show", "Posts", new { id = post.Id });
+            var vote = new Like() { PostId = post.Id };
+
+            return PartialView("_LikePartial", vote);
         }
 
         private void UnvoteIfPosible(int postId, Post post)
@@ -73,20 +88,18 @@ namespace TopPost.MVC.Controllers
             return score;
         }
 
-        public string GetCurrentUserValue(int postId)
+        public ActionResult GetUserLikes(string username)
         {
-            var user = this.GetUser();
-            var post = this.db.Posts.Find(postId);
+            var user = this.db.Users.All().FirstOrDefault(u => u.UserName == username);
 
-            foreach (var vote in post.Likes)
+            if (user == null)
             {
-                if (vote.UserId == user.Id)
-                {
-                    return vote.Value == true ? "Up" : "Down";
-                }
+                user = this.GetUser();
             }
 
-            return "";
+            var posts = user.Likes.Select(x => x.Post).ToList();
+
+            return PartialView("_ViewPostsPartial", posts);
         }
     }
 }

@@ -1,26 +1,22 @@
 ﻿<script>
-        function showDialog() {
-            $("#dialogPost").dialog();
-        };
+    function showDialog() {
+        $("#dialogPost").dialog({ width: 330, height: 230, title: "Submit Content", resizable: false });
+    };
 </script>
 @*@model TopPost.Models.Post*@
-<div id="dialogPost" title="Submit content" hidden="hidden">
-     @using (Html.BeginForm("FileUpload", "Posts", FormMethod.Post,
+
+<div id="dialogPost" hidden="hidden">
+    @using (Html.BeginForm("FileUpload", "Posts", FormMethod.Post,
                     new { enctype = "multipart/form-data" }))
     {
-        <div>
-            @Html.Label("Title")
-            @Html.TextBox("Title")
-            @*@Html.TextBoxFor(m => m.Title)*@
-            
-            <br />
-            @Html.Label("Description")
-            @Html.TextBox("Description")
-            @*@Html.TextBoxFor(m => m.Description)*@
-            <br />
-            Image<br />
-            <input type="file" name="file" id="file" style="width: 100%;" /> <br />
-            <input type="submit" value="Upload" class="submit" />
-        </div>
+        @Html.Label("Title")
+        @Html.TextBox("Title")
+        <br />
+        @Html.Label("Description")
+        @Html.TextBox("Description")
+        <p>Image:</p>
+        <input type="file" name="file" id="file" style="width: 100%;" />
+        <br />
+        <input type="submit" value="Upload" class="btn-default" />
     }
 </div>

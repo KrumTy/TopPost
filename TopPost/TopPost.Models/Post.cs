@@ -7,11 +7,15 @@
     {
         private ICollection<Comment> comments;
         private ICollection<Like> likes;
+        private ICollection<Favorite> favorites;
+        private ICollection<Tag> tags;
 
         public Post()
         {
             this.comments = new HashSet<Comment>();
             this.likes = new HashSet<Like>();
+            this.favorites = new HashSet<Favorite>();
+            this.tags = new HashSet<Tag>();
 
             this.Created = DateTime.Now;
         }
@@ -46,6 +50,18 @@
         {
             get { return this.likes; }
             set { this.likes = value; }
+        }
+
+        public virtual ICollection<Favorite> Favorites
+        {
+            get { return this.favorites; }
+            set { this.favorites = value; }
+        }
+
+        public virtual ICollection<Tag> Tags
+        {
+            get { return this.tags; }
+            set { this.tags = value; }
         }
     }
 }
