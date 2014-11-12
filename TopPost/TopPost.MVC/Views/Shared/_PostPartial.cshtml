@@ -6,7 +6,7 @@
 @*@model TopPost.Models.Post*@
 
 <div id="dialogPost" hidden="hidden">
-    @using (Html.BeginForm("FileUpload", "Posts", FormMethod.Post,
+    @using (Html.BeginForm("Post", "Posts", FormMethod.Post,
                     new { enctype = "multipart/form-data" }))
     {
         @Html.Label("Title")
@@ -14,6 +14,9 @@
         <br />
         @Html.Label("Description")
         @Html.TextBox("Description")
+        <br />
+        @Html.Label("StringTags")
+        @Html.TextBox("StringTags")
         <p>Image:</p>
         <input type="file" name="file" id="file" style="width: 100%;" />
         <br />

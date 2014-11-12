@@ -1,0 +1,16 @@
+﻿@model TopPost.Models.Tag
+
+@{
+    ViewBag.Title = "Tags";
+}
+
+<div>
+    @if (Model == null)
+    {
+        <h2>No results</h2>
+    }
+    else
+    {
+        @Html.Partial("_ViewPostsPartial", Model.Posts)
+    }
+</div>

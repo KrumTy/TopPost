@@ -73,13 +73,36 @@ namespace TopPost.MVC.Controllers
             }
 
             var posts = db.Posts.All();
-            if (info.TitleFilter != null)
+
+            // Filter
+            if (info.Filter != null)
             {
-                posts = posts.Where(p => p.Title.Contains(info.TitleFilter));
+                if (info.FilterBy == "Title")
+                {
+                    posts = posts.Where(p => p.Title.Contains(info.Filter));
+                }
+                else if (info.FilterBy == "Tag")
+                {
+                    var tag = this.db.Tags.All().FirstOrDefault(t => t.Name == info.Filter);
+
+                    if (tag == null)
+                    {
+                        info.PageCount = 0;
+                        info.CurrentPageIndex = 0;
+                        ViewBag.SortingPagingInfo = info;
+                        return View();
+                    }
+                    else
+                    {
+                        posts = tag.Posts.AsQueryable();
+                    }
+                }
             }
 
             info.PageCount = (posts.Count() / info.PageSize);
 
+            
+            // Sort
             switch (info.SortField)
             {
                 case "Title":
@@ -89,13 +112,28 @@ namespace TopPost.MVC.Controllers
                     break;
                 case "Description":
                     posts = (info.SortDirection == "Ascending" ?
-                    posts.OrderBy(c => c.Description) :
+                    posts.OrderBy(p => p.Description) :
                     posts.OrderByDescending(c => c.Description));
                     break;
                 case "Created":
                     posts = (info.SortDirection == "Ascending" ?
-                    posts.OrderBy(c => c.Created) :
+                    posts.OrderBy(p => p.Created) :
                     posts.OrderByDescending(c => c.Created));
+                    break;
+                case "Comments":
+                    posts = (info.SortDirection == "Ascending" ?
+                    posts.OrderBy(p => p.Comments.Count) :
+                    posts.OrderByDescending(c => c.Comments.Count));
+                    break;
+                case "Favorites":
+                    posts = (info.SortDirection == "Ascending" ?
+                    posts.OrderBy(p => p.Favorites.Count) :
+                    posts.OrderByDescending(c => c.Favorites.Count));
+                    break;
+                case "Likes":
+                    posts = (info.SortDirection == "Ascending" ?
+                    posts.OrderBy(p => p.Likes.Where(l => l.Value == true).Count() - p.Likes.Where(l => l.Value == false).Count()) :
+                    posts.OrderByDescending(p => p.Likes.Where(l => l.Value == true).Count() - p.Likes.Where(l => l.Value == false).Count()));
                     break;
             }
 
@@ -133,7 +171,7 @@ namespace TopPost.MVC.Controllers
             return PartialView("_ViewPostsPartial", posts);
         }
 
-        public ActionResult FileUpload(Post post, HttpPostedFileBase file)
+        public ActionResult Post(Post post, HttpPostedFileBase file, string StringTags)
         {
             if (file != null && ModelState.IsValid)
             {
@@ -142,14 +180,31 @@ namespace TopPost.MVC.Controllers
                 post.ThumbnailUrl = urls[1];
                 post.CategoryId = 1;
 
+                var tags = StringTags.Split(',').Select(x => new Tag() { Name = x.Trim() }).ToArray();
+
+                foreach (var tag in tags)
+                {
+                    var existigTag = this.db.Tags.All().FirstOrDefault(t => t.Name == tag.Name);
+                    if (existigTag == null)
+                    {
+                        post.Tags.Add(tag);
+                    }
+                    else
+                    {
+                        post.Tags.Add(existigTag);
+                    }
+                }
+
                 var user = this.GetUser();
                 user.Posts.Add(post);
-
                 db.Users.Update(user);
+
                 db.SaveChanges();
+
+                return RedirectToAction("Show", "Posts", new { id = post.Id });
             }
 
-            return RedirectToAction("Show", "Posts", new { id = post.Id});
+            return RedirectToAction("All", "Posts");
         }
     }
 }

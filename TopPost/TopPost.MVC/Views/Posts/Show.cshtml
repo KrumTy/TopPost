@@ -5,44 +5,57 @@
 }
 
 <div>
-    <div class="dl-horizontal col-md-8" style="text-align:center">
-        <h2>
-            @Html.DisplayNameFor(model => model.Title):
-            @Html.DisplayFor(model => model.Title)
-        </h2>
-        <div>
-            @Html.ActionLink("Previous", "Show", "Posts", new { id = Model.Id - 1 }, new { @Class = "btn btn-default" })
-            <img src="@Model.ImageUrl" style="max-width:400px;"/>
-            @Html.ActionLink("Next", "Show", "Posts", new { id = Model.Id + 1 }, new { @Class = "btn btn-default" })
-            <div id="likes-bar">
-                @Html.Action("GetLikes", "Likes", new { postId = Model.Id })
+    @if (Model == null)
+    {
+        <h2>Post was not found</h2>
+    }
+    else
+    {
+        <div class="dl-horizontal col-md-6" style="text-align:center">
+            <h2>
+                @Html.DisplayNameFor(model => model.Title):
+                @Html.DisplayFor(model => model.Title)
+            </h2>
+            <div>
+                @Html.ActionLink("Previous", "Show", "Posts", new { id = Model.Id - 1 }, new { @Class = "btn btn-default" })
+                <img src="@Model.ImageUrl" style="max-width:350px;" />
+                @Html.ActionLink("Next", "Show", "Posts", new { id = Model.Id + 1 }, new { @Class = "btn btn-default" })
+                <div id="likes-bar">
+                    @Html.Action("GetLikes", "Likes", new { postId = Model.Id })
+                </div>
+                
             </div>
-            <div id="fav-bar">
-                @Html.Action("GetFavoriteButton", "Favorites", new { postId = Model.Id })
+
+            <b>@Html.DisplayNameFor(model => model.Description)</b>
+            <p>
+                @Html.DisplayFor(model => model.Description)
+            </p>
+            <div>
+                @Html.DisplayNameFor(model => model.Author):
+                @Html.ActionLink((Model.Author != null) ? Model.Author.UserName : "annonymous", "Profiles", "User", new { username = (Model.Author != null) ? Model.Author.UserName : "annonymous" }, null)
+            </div>
+
+            <div>
+                @Html.DisplayNameFor(model => model.Category)
+                @Html.DisplayFor(model => model.Category.Name)
+            </div>
+
+            <div>
+                @Html.DisplayNameFor(model => model.Tags):
+                @foreach (var tag in Model.Tags.ToList())
+                {
+                    @Html.ActionLink(tag.Name, "Index", "Tags", new { tagName = tag.Name }, null)
+                    <span>,</span>
+                }
+            </div>
+
+            <div>
+                @Html.DisplayNameFor(model => model.Created)
+                @Html.DisplayFor(model => model.Created)
             </div>
         </div>
-
-        <b>@Html.DisplayNameFor(model => model.Description)</b>
-        <p>
-            @Html.DisplayFor(model => model.Description)
-        </p>
-        <div>
-            @Html.DisplayNameFor(model => model.Author):
-            @Html.DisplayFor(model => model.Author.UserName)
-        </div>
-
-        <div>
-            @Html.DisplayNameFor(model => model.Category)
-            @Html.DisplayFor(model => model.Category.Name)
-        </div>
-
-        <div>
-            @Html.DisplayNameFor(model => model.Created)
-            @Html.DisplayFor(model => model.Created)
-        </div>
-    </div>
-    <div class="dl-horizontal col-md-4">
-        @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = Model.Id },
+        <div class="dl-horizontal col-md-6">
+            @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = Model.Id },
                 new AjaxOptions
                 {
                     InsertionMode = InsertionMode.Replace,
@@ -51,8 +64,9 @@
                     UpdateTargetId = "dialogSubComment"
                 }, new { @Class = "btn btn-info" })
 
-        <h2>@Html.LabelFor(c => c.Comments):</h2>
-        @Html.Action("GetPostComments", "Comments", new { postId = Model.Id })
-        <div id="dialogSubComment" style="text-align:center"></div>
-    </div>
+            <h2>@Html.LabelFor(c => c.Comments):</h2>
+            @Html.Action("GetPostComments", "Comments", new { postId = Model.Id })
+            <div id="dialogSubComment" style="text-align:center"></div>
+        </div>
+    }
 </div>

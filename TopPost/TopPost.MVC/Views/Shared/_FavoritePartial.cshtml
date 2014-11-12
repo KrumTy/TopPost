@@ -11,9 +11,9 @@
 
 @if (Model.User == null)
 {
-    @Ajax.ActionLink("add to Favorites", "Add", "Favorites", new { postId = Model.PostId }, oprions, new { @Class = "label btn-default" })
+    @Ajax.ActionLink("Favorite", "Add", "Favorites", new { postId = Model.PostId }, oprions, new { @Class = "btn btn-default" })
 }
 else
 {
-    @Ajax.ActionLink("Favorited", "Remove", "Favorites", new { favId = Model.Id }, oprions, new { @Class = "label btn-success" })
+    @Ajax.ActionLink("Favorited", "Remove", "Favorites", new { favId = Model.Id }, oprions, new { @Class = "btn btn-success" })
 }

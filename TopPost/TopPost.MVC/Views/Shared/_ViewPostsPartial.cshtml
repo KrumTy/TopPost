@@ -1,12 +1,22 @@
 ﻿@model IEnumerable<TopPost.Models.Post>
 
-@foreach (var fav in Model)
-{
-    <a href="~/Posts/Show/@fav.Id" class="thumbnail-container">
-        <div>@fav.Title</div>
-        <div>
-            <img src="@fav.ThumbnailUrl" width="180px" height="180px" />
-        </div>
-    </a>
-}
-
+<div>
+    @if (Model == null)
+    {
+        <h2>
+            No results
+        </h2>
+    }
+    else
+    {
+        foreach (var fav in Model)
+        {
+            <a href="~/Posts/Show/@fav.Id" class="thumbnail-container">
+                <div>@fav.Title</div>
+                <div>
+                    <img src="@fav.ThumbnailUrl" width="180px" height="180px" />
+                </div>
+            </a>
+        }
+    }
+</div>

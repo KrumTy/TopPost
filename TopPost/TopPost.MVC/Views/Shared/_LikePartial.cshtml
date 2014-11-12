@@ -24,4 +24,9 @@ else
     @Ajax.ActionLink("Like", "Vote", "Likes", new { Value = true, PostId = Model.PostId }, oprions, new { @Class = "btn btn-default" })
     @Ajax.ActionLink("Dislike", "Vote", "Likes", new { Value = false, PostId = Model.PostId }, oprions, new { @Class = "btn btn-default" })
 }
-Score: @Html.Action("GetScore", "Likes", new { postId = Model.PostId })
+<span id="fav-bar">
+    @Html.Action("GetFavoriteButton", "Favorites", new { postId = Model.PostId })
+</span>
+<div>
+    Score: @Html.Action("GetScore", "Likes", new { postId = Model.PostId })
+</div>

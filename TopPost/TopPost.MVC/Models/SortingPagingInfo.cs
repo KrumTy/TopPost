@@ -11,6 +11,8 @@ namespace TopPost.MVC.Models
         public int PageCount { get; set; }
         public int CurrentPageIndex { get; set; }
         public string TitleFilter { get; set; }
+        public string FilterBy { get; set; }
+        public string Filter { get; set; }
 
         public static SortingPagingInfo Default()
         {
@@ -19,10 +21,11 @@ namespace TopPost.MVC.Models
                 CurrentPageIndex = 0,
                 PageSize = 50,
                 SortDirection = "Ascending",
-                SortField = "Title"
+                SortField = "Title",
+                FilterBy = "Title"
             };
         }
-        
+
         public static List<SelectListItem> ShowPagesList(string exclude)
         {
             var list = new List<SelectListItem>()
@@ -80,6 +83,21 @@ namespace TopPost.MVC.Models
                 {
                     Text = "Created",
                     Value = "Created"
+                },
+                new SelectListItem
+                {
+                    Text = "Comments",
+                    Value = "Comments"
+                },
+                new SelectListItem
+                {
+                    Text = "Favorites",
+                    Value = "Favorites"
+                },
+                new SelectListItem
+                {
+                    Text = "Likes",
+                    Value = "Likes"
                 }
             };
 
@@ -99,6 +117,25 @@ namespace TopPost.MVC.Models
                 {
                     Text = "Descending",
                     Value = "Descending"
+                }
+            };
+
+            return list.Where(x => x.Text != exclude).ToList();
+        }
+
+        public static List<SelectListItem> FilterByList(string exclude)
+        {
+            var list = new List<SelectListItem>()
+            {
+                new SelectListItem
+                {
+                    Text = "Title",
+                    Value = "Title"
+                },
+                new SelectListItem
+                {
+                    Text = "Tag",
+                    Value = "Tag"
                 }
             };
 
