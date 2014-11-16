@@ -1,0 +1,21 @@
+﻿@model TopPost.Web.ViewModels.Favorites.FavoriteViewModel
+
+@{
+    var oprions = new AjaxOptions
+                {
+                    InsertionMode = InsertionMode.Replace,
+                    HttpMethod = "GET",
+                    UpdateTargetId = "fav-bar-" + Model.PostId
+                };
+}
+
+<span>
+    @if (Model.Id == 0)
+    {
+        @Ajax.ActionLink("Favorite", "Add", "Favorites", new { postId = Model.PostId }, oprions, new { @Class = "btn btn-default btn-vote" })
+    }
+    else
+    {
+        @Ajax.ActionLink("Favorited", "Remove", "Favorites", new { postId = Model.PostId }, oprions, new { @Class = "btn btn-success btn-vote" })
+    }
+</span>

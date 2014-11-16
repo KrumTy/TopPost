@@ -1,0 +1,86 @@
+﻿@model TopPost.Web.ViewModels.Posts.PostInputModel
+
+@{
+    var options = new AjaxOptions
+                {
+                    InsertionMode = InsertionMode.Replace,
+                    HttpMethod = "GET",
+                    //UpdateTargetId = "dialogPost" //"comments-list-" + Model.PostId
+                };
+}
+
+@using (Html.BeginForm("Post", "Posts", FormMethod.Post, 
+                        new { enctype = "multipart/form-data"}))
+{
+    @Html.AntiForgeryToken()
+    <div>
+        <div>
+            @Html.LabelFor(m => m.Title)
+        </div>
+        <div >
+            @Html.TextBoxFor(m => m.Title, new { style = "width:300px"})
+        </div>
+        <div>
+            @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div>
+        <div>
+            @Html.LabelFor(m => m.Description)
+        </div>
+        <div>
+            @Html.TextAreaFor(m => m.Description, new { rows = "6", cols = "60", resize = "none" })
+        </div>
+        <div>
+            @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div>
+        <div>
+            @Html.LabelFor(m => m.StringTags)
+        </div>
+        <div>
+            @Html.TextBoxFor(m => m.StringTags, new { style = "width:300px" })
+        </div>
+        <div>
+            @Html.ValidationMessageFor(m => m.StringTags, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div>
+        <div>
+            @Html.LabelFor(m => m.file)
+        </div>
+        <div>
+            <input type="file" name="file" id="file"/>
+        </div>
+        <div>
+            @Html.ValidationMessageFor(m => m.file, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <input type="submit" value="Upload" class="btn-default" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+@*@model TopPost.Models.Post*@
+
+@*<div id="dialogPost" hidden="hidden">
+        @using (Html.BeginForm("Post", "Posts", FormMethod.Post,
+                        new { enctype = "multipart/form-data" }))
+        {
+            @Html.Label("Title")
+            @Html.TextBox("Title")
+            <br />
+            @Html.Label("Description")
+            @Html.TextBox("Description")
+            <br />
+            @Html.Label("StringTags")
+            @Html.TextBox("StringTags")
+            <p>Image:</p>
+            <input type="file" name="file" id="file" style="width: 100%;" />
+            <br />
+            <input type="submit" value="Upload" class="btn-default" />
+        }
+    </div>*@

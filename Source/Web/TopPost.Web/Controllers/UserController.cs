@@ -1,13 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-
-namespace TopPost.Web.Controllers
+﻿namespace TopPost.Web.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Web;
+    using System.Web.Mvc;
+    using TopPost.Data;
+
     public class UserController : BaseController
     {
+        public UserController(ITopPostData data)
+            :base(data)
+        {
+
+        }
+
         // GET: Profile
         public ActionResult Index(string username)
         {
@@ -20,12 +27,12 @@ namespace TopPost.Web.Controllers
                 ViewBag.username = username;
             }
 
-            return View();
+            return this.View();
         }
 
         public ActionResult Profiles(string username)
         {
-            //var username = this.db.Users.All().FirstOrDefault(x => x.UserName == username);
+            // var username = this.db.Users.All().FirstOrDefault(x => x.UserName == username);
             if (username == null)
             {
                 ViewBag.username = this.User.Identity.Name;
@@ -42,7 +49,7 @@ namespace TopPost.Web.Controllers
                 }
             }
 
-            return View(); // TODO: Models
+            return this.View(); // TODO: Models
         }
     }
 }

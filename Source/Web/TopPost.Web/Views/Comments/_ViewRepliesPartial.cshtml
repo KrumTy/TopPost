@@ -1,0 +1,59 @@
+﻿@model IList<TopPost.Web.ViewModels.Comments.CommentDetailViewModel>
+
+@if (Model.Count() > 0)
+{
+    var hasParent = (Model[0].ParentCommentId != null);
+
+    <div id="@(hasParent ? ("comments-" + Model[0].ParentCommentId) : ("comments-list-" + Model[0].PostId.ToString()))" style="padding:10px; display:none;">
+        @*@if (!hasParent && User.Identity.IsAuthenticated)
+        {
+            @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = Model[0].PostId }, new AjaxOptions { InsertionMode = InsertionMode.Replace, HttpMethod = "GET", OnComplete = "showDialogSubComment()", UpdateTargetId = "dialogSubComment" }, new { @Class = "btn btn-info btn-block" })
+        }*@
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <div id="@Model[i].Id" style="padding-bottom:10px;border-bottom: 1px solid black; border-left: 2px solid black; padding-left:5px;">
+                <div class="text-right">
+                    @Html.ActionLink(Model[i].AuthorName, "Profiles", "User", new { username = Model[i].AuthorName }, null)
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @Ajax.ActionLink("reply", "GetReplyPartial", "Comments", new { commentId = Model[i].Id },
+                    new AjaxOptions
+                    {
+                        InsertionMode = InsertionMode.Replace,
+                        HttpMethod = "GET",
+                        OnComplete = "showDialogSubComment()",
+                        UpdateTargetId = "dialogSubComment"
+                    }, new { @Class = "label label-success" })
+                    }
+                    @if (Model[i].CommentsCount != 0 && User.Identity.IsAuthenticated)
+                    {
+                        @Ajax.ActionLink(string.Format("replies ({0})", Model[i].CommentsCount), "GetComments", "Comments", new { commentId = Model[i].Id },
+                        new AjaxOptions
+                        {
+                            InsertionMode = InsertionMode.InsertAfter,
+                            HttpMethod = "GET",
+                            OnComplete = string.Format("hideShowReplies({0})", Model[i].Id),
+                            UpdateTargetId = @Model[i].Id.ToString()
+                        }, new { @Class = "label label-primary", id = string.Format("btn-show-replies-{0}", Model[i].Id) })
+                        <a id="btn-hide-replies-@Model[i].Id" onclick="hideShowReplies(@Model[i].Id)" style="display:none" class="label label-default">hide</a>
+                    }
+                </div>
+                <p class="text-info text-left" style="word-wrap: break-word;">@Model[i].Text</p>
+
+                <div class="text-left" id="comment-likes-bar-@Model[i].Id">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @Html.Action("GetCommentLikes", "Likes", new { commentId = Model[i].Id })
+                    }
+                    else
+                    {
+                        <span class="label">
+                            Likes: @Html.Action("GetCommentScore", "Likes", new { commentId = Model[i].Id })
+                        </span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

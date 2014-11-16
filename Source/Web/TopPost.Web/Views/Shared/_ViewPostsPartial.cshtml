@@ -1,6 +1,6 @@
-﻿@model IEnumerable<TopPost.Models.Post>
+﻿@model IEnumerable<TopPost.Web.ViewModels.Posts.PostThumbViewModel>
 
-<div>
+<div class="text-center">
     @if (Model == null)
     {
         <h2>
@@ -9,12 +9,12 @@
     }
     else
     {
-        foreach (var fav in Model)
+        foreach (var image in Model)
         {
-            <a href="~/Posts/Show/@fav.Id" class="thumbnail-container">
-                <div>@fav.Title</div>
+            <a href="~/Posts/Show/@image.Id" class="thumbnail-container">
+                <div>@image.Title</div>
                 <div>
-                    <img src="@fav.ThumbnailUrl" width="180px" height="180px" />
+                    <img src="@image.ThumbnailUrl" width="180" height="180" />
                 </div>
             </a>
         }

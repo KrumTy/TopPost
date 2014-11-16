@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+
     using TopPost.Data.Common.Models;
 
     public class Post : DeletableEntity
@@ -21,14 +23,24 @@
             this.Created = DateTime.Now;
         }
 
+        [Key]
         public int Id { get; set; }
 
+        [Required]
+        [StringLength(30, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 1)]
+        [DataType(DataType.Text)]
+        [Display(Name = "Title")]
         public string Title { get; set; }
 
+        [Required]
+        [StringLength(200, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 1)]
+        [DataType(DataType.Text)]
         public string Description { get; set; }
 
+        [Required]
         public string ImageUrl { get; set; }
 
+        [Required]
         public string ThumbnailUrl { get; set; }
 
         public DateTime Created { get; set; }

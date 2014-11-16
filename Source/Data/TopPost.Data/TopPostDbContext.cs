@@ -2,14 +2,14 @@
 {
     using System;
     using System.Data.Entity;
+    using System.Data.Entity.ModelConfiguration.Conventions;
     using System.Linq;
 
     using Microsoft.AspNet.Identity.EntityFramework;
 
-    using TopPost.Models;
-    using TopPost.Data.Migrations;
     using TopPost.Data.Common.Models;
-    using System.Data.Entity.ModelConfiguration.Conventions;
+    using TopPost.Data.Migrations;
+    using TopPost.Models;
 
     public class TopPostDbContext : IdentityDbContext<ApplicationUser>, ITopPostDbContext
     {
@@ -19,23 +19,21 @@
             Database.SetInitializer(new MigrateDatabaseToLatestVersion<TopPostDbContext, Configuration>());
         }
 
+        public IDbSet<Category> Categories { get; set; }
+
+        public IDbSet<Post> Posts { get; set; }
+
+        public IDbSet<Comment> Comments { get; set; }
+
+        public IDbSet<Like> Likes { get; set; }
+
+        public IDbSet<Favorite> Favorites { get; set; }
+
+        public IDbSet<Tag> Tags { get; set; }
+
         public static TopPostDbContext Create()
         {
             return new TopPostDbContext();
-        }
-
-
-        public IDbSet<Category> Categories { get; set; }
-        public IDbSet<Post> Posts { get; set; }
-        public IDbSet<Comment> Comments { get; set; }
-        public IDbSet<Like> Likes { get; set; }
-        public IDbSet<Favorite> Favorites { get; set; }
-        public IDbSet<Tag> Tags { get; set; }
-
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
-            base.OnModelCreating(modelBuilder);
         }
 
         public new IDbSet<T> Set<T>() where T : class
@@ -48,6 +46,12 @@
             this.ApplyAuditInfoRules();
             this.ApplyDeletableEntityRules();
             return base.SaveChanges();
+        }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
+            base.OnModelCreating(modelBuilder);
         }
 
         private void ApplyAuditInfoRules()

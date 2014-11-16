@@ -1,22 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using TopPost.Data;
-using TopPost.Data.Common;
-using TopPost.Models;
-using PagedList;
-using TopPost.Web.Models;
-using System.Drawing;
-using TopPost.ImageUpload;
-
-namespace TopPost.Web.Controllers
+﻿namespace TopPost.Web.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
+    using System.Web;
+    using System.Web.Mvc;
+
+    using AutoMapper;
+    using AutoMapper.QueryableExtensions;
+    using PagedList;
+
+    using TopPost.Data;
+    using TopPost.Data.Common;
+    using TopPost.Data.Common.Repositories;
+    using TopPost.ImageUpload;
+    using TopPost.Models;
+    using TopPost.Web.Models;
+    using TopPost.Web.ViewModels.Posts;
+    using TopPost.Web.Infrastructure.Caching;
+
     public class PostsController : BaseController
     {
+        private readonly IDeletableEntityRepository<Post> posts;
+        private ICacheService cache;
+
+        public PostsController(ITopPostData data, IDeletableEntityRepository<Post> posts, ICacheService cache)
+            :base(data)
+        {
+            this.posts = posts;
+            this.cache = cache;
+        }
+
+        public ActionResult Load(int skip = 0, int take = 5)
+        {
+            var nextPosts = this.posts
+                .All()
+                .OrderByDescending(p => p.Likes.Where(l => l.Value == true && !l.IsDeleted).Count() - p.Likes.Where(l => l.Value == false && !l.IsDeleted).Count())
+                .Skip(skip)
+                .Take(take)
+                .Project()
+                .To<PostViewModel>()
+                .ToList();
+
+            this.ViewBag.PostsCount = skip + take;
+
+            return this.PartialView("_LoadNextPostsPartial", nextPosts);
+        }
+
+        public ActionResult Front()
+        {
+            this.ViewBag.lastPostId = 0;
+
+            return this.View();
+        }
+
         // GET: Post
+        //[ChildActionOnly]
+        [OutputCache(Duration = 60 * 60)]
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, int? show)
         {
             ViewBag.CurrentSort = sortOrder;
@@ -34,36 +76,37 @@ namespace TopPost.Web.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var posts = db.Posts.All();
+            var displayPosts = this.posts.All(); // db.Posts.All();
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(searchString))
             {
-                posts = posts.Where(s => s.Title.ToUpper().Contains(searchString.ToUpper())
+                displayPosts = displayPosts.Where(s => s.Title.ToUpper().Contains(searchString.ToUpper())
                                        || s.Description.ToUpper().Contains(searchString.ToUpper()));
             }
 
             switch (sortOrder)
             {
                 case "name_asc":
-                    posts = posts.OrderBy(s => s.Title);
+                    displayPosts = displayPosts.OrderBy(s => s.Title);
                     break;
                 case "name_desc":
-                    posts = posts.OrderByDescending(s => s.Title);
+                    displayPosts = displayPosts.OrderByDescending(s => s.Title);
                     break;
                 case "date_asc":
-                    posts = posts.OrderBy(s => s.Created);
+                    displayPosts = displayPosts.OrderBy(s => s.Created);
                     break;
                 case "date_desc":
-                    posts = posts.OrderByDescending(s => s.Created);
+                    displayPosts = displayPosts.OrderByDescending(s => s.Created);
                     break;
                 default:
-                    posts = posts.OrderBy(s => s.Title);
+                    displayPosts = displayPosts.OrderBy(s => s.Title);
                     break;
             }
 
             int pageSize = show == null ? 3 : (int)show;
-            int pageNumber = (page ?? 1);
-            return View(posts.ToPagedList(pageNumber, pageSize));
+            int pageNumber = page ?? 1;
+
+            return this.View(displayPosts.ToPagedList(pageNumber, pageSize));
         }
 
         public ActionResult All(SortingPagingInfo info)
@@ -73,14 +116,14 @@ namespace TopPost.Web.Controllers
                 info = SortingPagingInfo.Default();
             }
 
-            var posts = db.Posts.All();
+            var displayPosts = GetAllPosts();// db.Posts.All();
 
             // Filter
             if (info.Filter != null)
             {
                 if (info.FilterBy == "Title")
                 {
-                    posts = posts.Where(p => p.Title.Contains(info.Filter));
+                    displayPosts = displayPosts.Where(p => p.Title.Contains(info.Filter));
                 }
                 else if (info.FilterBy == "Tag")
                 {
@@ -91,71 +134,92 @@ namespace TopPost.Web.Controllers
                         info.PageCount = 0;
                         info.CurrentPageIndex = 0;
                         ViewBag.SortingPagingInfo = info;
-                        return View();
+                        return this.View();
                     }
                     else
                     {
-                        posts = tag.Posts.AsQueryable();
+                        displayPosts = tag.Posts.AsQueryable();
                     }
                 }
             }
 
-            info.PageCount = (posts.Count() / info.PageSize);
+            info.PageCount = displayPosts.Count() / info.PageSize;
 
-            
             // Sort
             switch (info.SortField)
             {
                 case "Title":
-                    posts = (info.SortDirection == "Ascending" ?
-                    posts.OrderBy(c => c.Title) :
-                    posts.OrderByDescending(c => c.Title));
+                    displayPosts = info.SortDirection == "Ascending" ?
+                    displayPosts.OrderBy(c => c.Title) :
+                    displayPosts.OrderByDescending(c => c.Title);
                     break;
                 case "Description":
-                    posts = (info.SortDirection == "Ascending" ?
-                    posts.OrderBy(p => p.Description) :
-                    posts.OrderByDescending(c => c.Description));
+                    displayPosts = info.SortDirection == "Ascending" ?
+                    displayPosts.OrderBy(p => p.Description) :
+                    displayPosts.OrderByDescending(c => c.Description);
                     break;
                 case "Created":
-                    posts = (info.SortDirection == "Ascending" ?
-                    posts.OrderBy(p => p.Created) :
-                    posts.OrderByDescending(c => c.Created));
+                    displayPosts = info.SortDirection == "Ascending" ?
+                    displayPosts.OrderBy(p => p.Created) :
+                    displayPosts.OrderByDescending(c => c.Created);
                     break;
                 case "Comments":
-                    posts = (info.SortDirection == "Ascending" ?
-                    posts.OrderBy(p => p.Comments.Count) :
-                    posts.OrderByDescending(c => c.Comments.Count));
+                    displayPosts = info.SortDirection == "Ascending" ?
+                    displayPosts.OrderBy(p => p.Comments.Count) :
+                    displayPosts.OrderByDescending(c => c.Comments.Count);
                     break;
                 case "Favorites":
-                    posts = (info.SortDirection == "Ascending" ?
-                    posts.OrderBy(p => p.Favorites.Count) :
-                    posts.OrderByDescending(c => c.Favorites.Count));
+                    displayPosts = info.SortDirection == "Ascending" ?
+                    displayPosts.OrderBy(p => p.Favorites.Count) :
+                    displayPosts.OrderByDescending(c => c.Favorites.Count);
                     break;
                 case "Likes":
-                    posts = (info.SortDirection == "Ascending" ?
-                    posts.OrderBy(p => p.Likes.Where(l => l.Value == true).Count() - p.Likes.Where(l => l.Value == false).Count()) :
-                    posts.OrderByDescending(p => p.Likes.Where(l => l.Value == true).Count() - p.Likes.Where(l => l.Value == false).Count()));
+                    displayPosts = info.SortDirection == "Ascending" ?
+                    displayPosts.OrderBy(p => p.Likes.Where(l => l.Value == true && !l.IsDeleted).Count() - p.Likes.Where(l => l.Value == false && !l.IsDeleted).Count()) :
+                    displayPosts.OrderByDescending(p => p.Likes.Where(l => l.Value == true && !l.IsDeleted).Count() - p.Likes.Where(l => l.Value == false && !l.IsDeleted).Count());
                     break;
             }
 
-            if (info.CurrentPageIndex * info.PageSize > posts.Count())
+            if (info.CurrentPageIndex * info.PageSize > displayPosts.Count())
             {
                 info.CurrentPageIndex = 0;
             }
 
             ViewBag.SortingPagingInfo = info;
 
-            posts = posts.Skip(info.CurrentPageIndex * info.PageSize).Take(info.PageSize);
-            List<Post> model = posts.ToList();
+            displayPosts = displayPosts.Skip(info.CurrentPageIndex * info.PageSize).Take(info.PageSize);
+            var model = displayPosts
+                .Project()
+                .To<PostThumbViewModel>()
+                .ToList();
 
-            return View(model);
+            return this.View(model);
+        }
+
+        private IQueryable<Post> GetAllPosts()
+        {
+            var displayPosts = this.cache.Get<IQueryable<Post>>("posts",
+                () =>
+                {
+                    return this.db.Posts
+                       .All();
+                       //.Select(c => new SelectListItem
+                       //{
+                       //    Value = c.Id.ToString(),
+                       //    Text = c.Name
+                       //})
+                       //.ToList();
+                }); //this.posts.All();
+
+            return displayPosts;
         }
 
         public ActionResult Show(int id)
         {
-            var post = this.db.Posts.Find(id);
+            var post = this.posts.Find(id); // this.db.Posts.Find(id);
+            var postView = Mapper.Map<PostViewModel>(post);
 
-            return View(post); // TODO: Models
+            return this.View(postView); // TODO: Models
         }
 
         public ActionResult GetUserPosts(string username)
@@ -167,45 +231,54 @@ namespace TopPost.Web.Controllers
                 user = this.GetUser();
             }
 
-            var posts = user.Posts.Where(p => !p.IsDeleted).ToList();
+            var posts = user.Posts.AsQueryable().Where(p => !p.IsDeleted).Project().To<PostThumbViewModel>().ToList();
 
-            return PartialView("_ViewPostsPartial", posts);
+            return this.PartialView("_ViewPostsPartial", posts);
         }
 
-        public ActionResult Post(Post post, HttpPostedFileBase file, string StringTags)
+        public ActionResult Post(PostInputModel post)
         {
-            if (file != null && ModelState.IsValid)
+            if (post.file != null && ModelState.IsValid)
             {
-                var urls = ImageUploader.UrlFromFile(file);
-                post.ImageUrl = urls[0];
-                post.ThumbnailUrl = urls[1];
-                post.CategoryId = 1;
+                var urls = ImageUploader.UrlFromFile(post.file);
 
-                var tags = StringTags.Split(',').Select(x => new Tag() { Name = x.Trim() }).ToArray();
+                var newPost = new Post()
+                {
+                    Title = post.Title,
+                    Description = post.Description,
+                    ImageUrl = urls[0],
+                    ThumbnailUrl = urls[1],
+                    CategoryId = 1
+                };
+
+                var tags = post.StringTags.Split(',').Select(x => new Tag() { Name = x.Trim() }).ToArray();
 
                 foreach (var tag in tags)
                 {
                     var existigTag = this.db.Tags.All().FirstOrDefault(t => t.Name == tag.Name);
                     if (existigTag == null)
                     {
-                        post.Tags.Add(tag);
+                        newPost.Tags.Add(tag);
                     }
                     else
                     {
-                        post.Tags.Add(existigTag);
+                        newPost.Tags.Add(existigTag);
                     }
                 }
 
-                var user = this.GetUser();
-                user.Posts.Add(post);
-                db.Users.Update(user);
+                newPost.AuthorId = this.GetUser().Id;
+                this.posts.Add(newPost);
+                this.posts.SaveChanges();
 
-                db.SaveChanges();
-
-                return RedirectToAction("Show", "Posts", new { id = post.Id });
+                return this.RedirectToAction("Show", "Posts", new { id = newPost.Id });
             }
 
-            return RedirectToAction("All", "Posts");
+            return this.View("_PostPartial", post);
+        }
+
+        public ActionResult GetPostPartial()
+        {
+            return this.PartialView("_PostPartial");
         }
     }
 }

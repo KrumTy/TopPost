@@ -1,18 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using TopPost.Models;
-
-namespace TopPost.Web.Controllers
+﻿namespace TopPost.Web.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Web;
+    using System.Web.Mvc;
+
+    using AutoMapper;
+    using AutoMapper.QueryableExtensions;
+
+    using TopPost.Models;
+    using TopPost.Web.ViewModels.Posts;
+    using TopPost.Web.ViewModels.Favorites;
+    using TopPost.Data;
+
     public class FavoritesController : BaseController
     {
+        public FavoritesController(ITopPostData data)
+            : base(data)
+        {
+
+        }
+
         // GET: Favorites
         public ActionResult Index()
         {
-            return View();
+            return this.View();
         }
 
         public ActionResult GetFavoriteButton(int postId)
@@ -25,12 +38,15 @@ namespace TopPost.Web.Controllers
                 fav = new Favorite() { PostId = postId };
             }
 
-            return PartialView("_FavoritePartial", fav);
+            var favorite = Mapper.Map<FavoriteViewModel>(fav);
+
+            return this.PartialView("_FavoritePartial", favorite);
         }
 
         public ActionResult Add(int postId)
         {
             var userId = this.GetUser().Id;
+
             var fav = new Favorite()
             {
                 PostId = postId,
@@ -40,18 +56,23 @@ namespace TopPost.Web.Controllers
             this.db.Favorites.Add(fav);
             this.db.SaveChanges();
 
-            return PartialView("_FavoritePartial", fav);
+            var favorite = Mapper.Map<FavoriteViewModel>(fav);
+
+            return this.PartialView("_FavoritePartial", favorite);
         }
 
-        public ActionResult Remove(int favId)
+        public ActionResult Remove(int postId)
         {
-            var postId = this.db.Favorites.Find(favId).PostId;
-            this.db.Favorites.Delete(favId);
-            this.db.SaveChanges();
+            var favorite = this.db.Posts
+                .Find(postId)
+                .Favorites.FirstOrDefault(x => !x.IsDeleted && x.UserId == this.GetUser().Id);
 
-            var fav = new Favorite() { PostId = postId };
+            db.Favorites.Delete(favorite.Id);
+            db.SaveChanges();
 
-            return PartialView("_FavoritePartial", fav);
+            var fav = new FavoriteViewModel() { PostId = postId };
+
+            return this.PartialView("_FavoritePartial", fav);
         }
 
         public ActionResult GetUserFavorites(string username)
@@ -63,9 +84,10 @@ namespace TopPost.Web.Controllers
                 user = this.GetUser();
             }
 
-            var posts = user.Favorites.Where(x => !x.IsDeleted).Select(x=>x.Post).ToList();
+            var posts = user.Favorites.AsQueryable().Where(x => !x.IsDeleted).Select(x => x.Post)
+                .Project().To<PostThumbViewModel>().ToList();
 
-            return PartialView("_ViewPostsPartial", posts);
+            return this.PartialView("_ViewPostsPartial", posts);
         }
     }
 }

@@ -1,0 +1,43 @@
+﻿@model TopPost.Web.ViewModels.Vote.VoteViewModel
+
+@{
+    var oprions = new AjaxOptions
+                {
+                    InsertionMode = InsertionMode.Replace,
+                    HttpMethod = "GET",
+                    UpdateTargetId = "likes-bar-" + Model.ContentId
+                };
+}
+
+@if (Model.Value == true)
+{
+    <span>
+        @Ajax.ActionLink("Liked", "Unvote", "Likes", new { PostId = Model.ContentId }, oprions, new { @Class = "btn btn-info btn-vote" })
+    </span>
+    <span>
+        @Ajax.ActionLink("Dislike", "Vote", "Likes", new { Value = false, PostId = Model.ContentId }, oprions, new { @Class = "btn btn-default btn-vote" })
+    </span>
+}
+else if (Model.Value == false)
+{
+    <span>
+
+        @Ajax.ActionLink("Like", "Vote", "Likes", new { Value = true, PostId = Model.ContentId }, oprions, new { @Class = "btn btn-default btn-vote" })
+    </span>
+    <span>
+
+        @Ajax.ActionLink("Disliked", "Unvote", "Likes", new { PostId = Model.ContentId }, oprions, new { @Class = "btn btn-danger btn-vote" })
+    </span>
+}
+else
+{
+    <span>
+        @Ajax.ActionLink("Like", "Vote", "Likes", new { Value = true, PostId = Model.ContentId }, oprions, new { @Class = "btn btn-default btn-vote" })
+    </span>
+    <span>
+        @Ajax.ActionLink("Dislike", "Vote", "Likes", new { Value = false, PostId = Model.ContentId }, oprions, new { @Class = "btn btn-default btn-vote" })
+    </span>
+}
+<span class="label">
+    Likes: @Html.Action("GetScore", "Likes", new { postId = Model.ContentId })
+</span>

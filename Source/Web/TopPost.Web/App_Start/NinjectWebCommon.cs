@@ -4,6 +4,7 @@
 namespace TopPost.Web.App_Start
 {
     using System;
+    using System.Data.Entity;
     using System.Web;
 
     using Microsoft.Web.Infrastructure.DynamicModuleHelper;
@@ -11,12 +12,12 @@ namespace TopPost.Web.App_Start
     using Ninject;
     using Ninject.Web.Common;
     using TopPost.Data;
-    using System.Data.Entity;
     using TopPost.Data.Common.Repositories;
+    using TopPost.Web.Infrastructure.Caching;
 
     public static class NinjectWebCommon 
     {
-        private static readonly Bootstrapper bootstrapper = new Bootstrapper();
+        private static readonly Bootstrapper Bootstrapper = new Bootstrapper();
 
         /// <summary>
         /// Starts the application
@@ -25,7 +26,7 @@ namespace TopPost.Web.App_Start
         {
             DynamicModuleUtility.RegisterModule(typeof(OnePerRequestHttpModule));
             DynamicModuleUtility.RegisterModule(typeof(NinjectHttpModule));
-            bootstrapper.Initialize(CreateKernel);
+            Bootstrapper.Initialize(CreateKernel);
         }
         
         /// <summary>
@@ -33,7 +34,7 @@ namespace TopPost.Web.App_Start
         /// </summary>
         public static void Stop()
         {
-            bootstrapper.ShutDown();
+            Bootstrapper.ShutDown();
         }
         
         /// <summary>
@@ -69,6 +70,7 @@ namespace TopPost.Web.App_Start
             kernel.Bind(typeof(IDeletableEntityRepository<>)).To(typeof(DeletableEntityRepository<>));
             kernel.Bind(typeof(IRepository<>)).To(typeof(GenericRepository<>));
             kernel.Bind<ITopPostData>().To<TopPostData>();
+            kernel.Bind<ICacheService>().To<InMemoryCache>();
         }        
     }
 }

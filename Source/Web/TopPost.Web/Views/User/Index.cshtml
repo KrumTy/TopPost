@@ -4,12 +4,3 @@
 }
 
 <h2>Index</h2>
-
-@Ajax.ActionLink("show Favorites", "Get", "Favorites", new { username = this.ViewBag.username }
-    , new AjaxOptions
-                    {
-                        InsertionMode = InsertionMode.Replace,
-                        HttpMethod = "GET",
-                        UpdateTargetId = "likes-bar"
-                    },
-new { @Class = "label btn-default" })

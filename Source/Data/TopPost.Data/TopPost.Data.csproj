@@ -95,6 +95,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\TopPost.Common\TopPost.Common.csproj">
+      <Project>{091b0dae-ef93-4bf1-bb47-ae61d12a819a}</Project>
+      <Name>TopPost.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TopPost.Data.Common\TopPost.Data.Common.csproj">
       <Project>{f1656f19-780d-4201-ba3a-25cf911bddac}</Project>
       <Name>TopPost.Data.Common</Name>

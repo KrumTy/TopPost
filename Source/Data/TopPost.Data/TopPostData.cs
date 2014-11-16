@@ -3,20 +3,15 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using TopPost.Data.Common.Repositories;
-    using TopPost.Data.Common.Models;
-    using TopPost.Models;
 
+    using TopPost.Data.Common.Models;
+    using TopPost.Data.Common.Repositories;
+    using TopPost.Models;
 
     public class TopPostData : ITopPostData
     {
         private ITopPostDbContext context;
         private IDictionary<Type, object> repositories;
-
-        public static TopPostData Create()
-        {
-            return new TopPostData();
-        }
 
         public TopPostData()
             : this(new TopPostDbContext())
@@ -64,6 +59,16 @@
             get { return this.GetRepository<ApplicationUser>(); }
         }
 
+        public static TopPostData Create()
+        {
+            return new TopPostData();
+        }
+
+        public int SaveChanges()
+        {
+            return this.context.SaveChanges();
+        }
+
         private IDeletableEntityRepository<T> GetRepository<T>() where T : class, IDeletableEntity
         {
             var typeOfModel = typeof(T);
@@ -74,11 +79,6 @@
             }
 
             return (IDeletableEntityRepository<T>)this.repositories[typeOfModel];
-        }
-
-        public int SaveChanges()
-        {
-            return this.context.SaveChanges();
         }
     }
 }

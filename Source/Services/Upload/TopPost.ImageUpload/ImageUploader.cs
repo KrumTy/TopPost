@@ -13,7 +13,7 @@ namespace TopPost.ImageUpload
         {
             TopPostData db = TopPostData.Create();
 
-            string projectPath = "C:/Users/Ghos7/Documents/GitHub/TopPost/TopPost/TopPost.MVC";
+            string projectPath = "C:/Users/Ghos7/Documents/GitHub/TopPost/Source/Web/TopPost.Web";
             string fileName = (db.Posts.All().Count() + 1).ToString();
             string extension = Path.GetExtension(file.FileName);
             string imageUrl = "/images/" + fileName + extension;

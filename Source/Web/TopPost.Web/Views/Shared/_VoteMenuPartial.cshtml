@@ -1,0 +1,19 @@
+﻿@model int
+
+<div>
+@if (User.Identity.IsAuthenticated)
+{ 
+    <span id="fav-bar-@Model">
+        @Html.Action("GetFavoriteButton", "Favorites", new { postId = Model })
+    </span>
+    <span id="likes-bar-@Model">
+        @Html.Action("GetLikes", "Likes", new { postId = Model })
+    </span>
+}
+else
+{
+    <span class="label">
+        Likes: @Html.Action("GetCommentScore", "Likes", new { commentId = Model })
+    </span>
+}
+</div>

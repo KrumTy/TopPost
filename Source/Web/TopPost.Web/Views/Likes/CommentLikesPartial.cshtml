@@ -1,0 +1,45 @@
+﻿@model TopPost.Web.ViewModels.Vote.VoteViewModel
+
+@{
+    var oprions = new AjaxOptions
+                {
+                    InsertionMode = InsertionMode.Replace,
+                    HttpMethod = "GET",
+                    UpdateTargetId = "comment-likes-bar-" + Model.ContentId
+                };
+}
+
+
+@if (Model.Value == true)
+{
+    <span>
+        @Ajax.ActionLink("Liked", "UnvoteComment", "Likes", new { CommentId = Model.ContentId }, oprions, new { @Class = "label label-info" })
+    </span>
+    <span>
+        @Ajax.ActionLink("Dislike", "VoteComment", "Likes", new { Value = false, CommentId = Model.ContentId }, oprions, new { @Class = "label label-default" })
+    </span>
+}
+else if (Model.Value == false)
+{
+    <span>
+
+        @Ajax.ActionLink("Like", "VoteComment", "Likes", new { Value = true, CommentId = Model.ContentId }, oprions, new { @Class = "label label-default" })
+    </span>
+    <span>
+
+        @Ajax.ActionLink("Disliked", "UnvoteComment", "Likes", new { CommentId = Model.ContentId }, oprions, new { @Class = "label label-danger" })
+    </span>
+}
+else
+{
+    <span>
+        @Ajax.ActionLink("Like", "VoteComment", "Likes", new { Value = true, CommentId = Model.ContentId }, oprions, new { @Class = "label label-default" })
+    </span>
+    <span>
+        @Ajax.ActionLink("Dislike", "VoteComment", "Likes", new { Value = false, CommentId = Model.ContentId }, oprions, new { @Class = "label label-default" })
+    </span>
+}
+
+<span class="label">
+    Likes: @Html.Action("GetCommentScore", "Likes", new { commentId = Model.ContentId })
+</span>

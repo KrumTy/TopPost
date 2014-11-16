@@ -1,16 +1,18 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
-using TopPost.Web.Models;
-using TopPost.Models;
-
-namespace TopPost.Web.Controllers
+﻿namespace TopPost.Web.Controllers
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Web;
+    using System.Web.Mvc;
+
+    using Microsoft.AspNet.Identity;
+    using Microsoft.AspNet.Identity.Owin;
+    using Microsoft.Owin.Security;
+
+    using TopPost.Web.Models;
+    using TopPost.Models;
+
     [Authorize]
     public class ManageController : Controller
     {
@@ -24,12 +26,14 @@ namespace TopPost.Web.Controllers
         }
 
         private ApplicationUserManager _userManager;
+
         public ApplicationUserManager UserManager
         {
             get
             {
                 return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
             }
+
             private set
             {
                 _userManager = value;
@@ -84,12 +88,14 @@ namespace TopPost.Web.Controllers
                 {
                     await SignInAsync(user, isPersistent: false);
                 }
+
                 message = ManageMessageId.RemoveLoginSuccess;
             }
             else
             {
                 message = ManageMessageId.Error;
             }
+
             return RedirectToAction("ManageLogins", new { Message = message });
         }
 
@@ -110,6 +116,7 @@ namespace TopPost.Web.Controllers
             {
                 return View(model);
             }
+
             // Generate the token and send it
             var code = await UserManager.GenerateChangePhoneNumberTokenAsync(User.Identity.GetUserId(), model.Number);
             if (UserManager.SmsService != null)
@@ -121,6 +128,7 @@ namespace TopPost.Web.Controllers
                 };
                 await UserManager.SmsService.SendAsync(message);
             }
+
             return RedirectToAction("VerifyPhoneNumber", new { PhoneNumber = model.Number });
         }
 
@@ -135,6 +143,7 @@ namespace TopPost.Web.Controllers
             {
                 await SignInAsync(user, isPersistent: false);
             }
+
             return RedirectToAction("Index", "Manage");
         }
 
@@ -149,6 +158,7 @@ namespace TopPost.Web.Controllers
             {
                 await SignInAsync(user, isPersistent: false);
             }
+
             return RedirectToAction("Index", "Manage");
         }
 
@@ -157,6 +167,7 @@ namespace TopPost.Web.Controllers
         public async Task<ActionResult> VerifyPhoneNumber(string phoneNumber)
         {
             var code = await UserManager.GenerateChangePhoneNumberTokenAsync(User.Identity.GetUserId(), phoneNumber);
+
             // Send an SMS through the SMS provider to verify the phone number
             return phoneNumber == null ? View("Error") : View(new VerifyPhoneNumberViewModel { PhoneNumber = phoneNumber });
         }
@@ -171,6 +182,7 @@ namespace TopPost.Web.Controllers
             {
                 return View(model);
             }
+
             var result = await UserManager.ChangePhoneNumberAsync(User.Identity.GetUserId(), model.PhoneNumber, model.Code);
             if (result.Succeeded)
             {
@@ -179,10 +191,13 @@ namespace TopPost.Web.Controllers
                 {
                     await SignInAsync(user, isPersistent: false);
                 }
+
                 return RedirectToAction("Index", new { Message = ManageMessageId.AddPhoneSuccess });
             }
+
             // If we got this far, something failed, redisplay form
             ModelState.AddModelError("", "Failed to verify phone");
+
             return View(model);
         }
 
@@ -195,11 +210,13 @@ namespace TopPost.Web.Controllers
             {
                 return RedirectToAction("Index", new { Message = ManageMessageId.Error });
             }
+
             var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
             if (user != null)
             {
                 await SignInAsync(user, isPersistent: false);
             }
+
             return RedirectToAction("Index", new { Message = ManageMessageId.RemovePhoneSuccess });
         }
 
@@ -220,6 +237,7 @@ namespace TopPost.Web.Controllers
             {
                 return View(model);
             }
+
             var result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword, model.NewPassword);
             if (result.Succeeded)
             {
@@ -228,9 +246,12 @@ namespace TopPost.Web.Controllers
                 {
                     await SignInAsync(user, isPersistent: false);
                 }
+
                 return RedirectToAction("Index", new { Message = ManageMessageId.ChangePasswordSuccess });
             }
+
             AddErrors(result);
+
             return View(model);
         }
 
@@ -257,8 +278,10 @@ namespace TopPost.Web.Controllers
                     {
                         await SignInAsync(user, isPersistent: false);
                     }
+
                     return RedirectToAction("Index", new { Message = ManageMessageId.SetPasswordSuccess });
                 }
+
                 AddErrors(result);
             }
 
@@ -279,9 +302,11 @@ namespace TopPost.Web.Controllers
             {
                 return View("Error");
             }
+
             var userLogins = await UserManager.GetLoginsAsync(User.Identity.GetUserId());
             var otherLogins = AuthenticationManager.GetExternalAuthenticationTypes().Where(auth => userLogins.All(ul => auth.AuthenticationType != ul.LoginProvider)).ToList();
             ViewBag.ShowRemoveButton = user.PasswordHash != null || userLogins.Count > 1;
+
             return View(new ManageLoginsViewModel
             {
                 CurrentLogins = userLogins,
@@ -308,7 +333,9 @@ namespace TopPost.Web.Controllers
             {
                 return RedirectToAction("ManageLogins", new { Message = ManageMessageId.Error });
             }
+
             var result = await UserManager.AddLoginAsync(User.Identity.GetUserId(), loginInfo.Login);
+
             return result.Succeeded ? RedirectToAction("ManageLogins") : RedirectToAction("ManageLogins", new { Message = ManageMessageId.Error });
         }
 
@@ -345,6 +372,7 @@ namespace TopPost.Web.Controllers
             {
                 return user.PasswordHash != null;
             }
+
             return false;
         }
 
@@ -355,6 +383,7 @@ namespace TopPost.Web.Controllers
             {
                 return user.PhoneNumber != null;
             }
+
             return false;
         }
 

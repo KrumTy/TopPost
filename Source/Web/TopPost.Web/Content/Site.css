@@ -23,6 +23,60 @@ textarea {
     max-width: 280px;
 }
 
-.thumbnail-container{
-    display:inline-block;
+.thumbnail-container {
+    display: inline-block;
 }
+
+.image-container {
+    position: fixed;
+    display: inline-block;
+    right: 0;
+    left: 0;
+}
+
+.btn-vote {
+    width: 85px;
+}
+
+.open > .dropdown-menu {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+    opacity: 1;
+}
+
+.dropdown-menu {
+    opacity: .3;
+    -webkit-transform-origin: top;
+    transform-origin: top;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+    -webkit-transform: scale(1, 0);
+    display: block;
+    transition: all 0.2s linear;
+    -webkit-transition: all 0.2s linear;
+}
+
+.fixed-image{
+    position:fixed;
+    max-width:500px;
+}
+/*.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+    }*/

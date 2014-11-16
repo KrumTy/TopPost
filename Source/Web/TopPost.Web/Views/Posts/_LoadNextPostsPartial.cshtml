@@ -1,0 +1,35 @@
+﻿@model IEnumerable<TopPost.Web.ViewModels.Posts.PostViewModel>
+
+@foreach (var post in Model)
+{
+    <br />
+
+    <div class="jumbotron row text-center" id="post-@post.Id">
+        <div class="col-md-3" id="align-@post.Id"></div>
+        <div class="col-md-5">
+            <div>
+                <h3>@post.Title</h3>
+                <a href="~/Posts/Show/@post.Id" target="_blank" class="thumbnail-container">
+                    <div>
+                        <img src="@post.ImageUrl" alt="@post.Title" style="width:400px;" />
+                    </div>
+                </a>
+            </div>
+            <div>
+                @Html.Partial("_VoteMenuPartial", post.Id)
+            </div>
+            @Ajax.ActionLink("View Top Comments", "GetPostComments", "Comments", new { postId = post.Id, take = 5 }, new AjaxOptions
+                        {
+                            InsertionMode = InsertionMode.Replace,
+                            HttpMethod = "GET",
+                            OnComplete = string.Format("hideComments({0})", post.Id),
+                            UpdateTargetId = "comments-" + post.Id
+                        }, new { @Class = "btn btn-default  btn-block", id = "btn-load-comments-" + post.Id })
+            <a id="btn-hide-comments-@post.Id" class="btn btn-default btn-block" style="display:none" onclick="hideComments(@post.Id)">Hide Comments</a>
+        </div>
+        <div class="col-md-6">
+            @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = post.Id }, new AjaxOptions { InsertionMode = InsertionMode.Replace, HttpMethod = "GET", OnComplete = "showDialogSubComment()", UpdateTargetId = "dialogSubComment" }, new { @Class = "btn btn-info btn-block", id="add-comment-"+post.Id, style="display:none" })
+            <div id="comments-@post.Id"></div>
+        </div>
+    </div>
+}

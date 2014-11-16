@@ -1,18 +1,89 @@
 namespace TopPost.Data.Migrations
 {
+    using Microsoft.AspNet.Identity;
+    using Microsoft.AspNet.Identity.EntityFramework;
     using System;
     using System.Collections.Generic;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
     using TopPost.Models;
+    using TopPost.Common;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<TopPost.Data.TopPostDbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<TopPostDbContext>
     {
+        private UserManager<ApplicationUser> userManager;
+
         public Configuration()
         {
-            AutomaticMigrationsEnabled = true;
-            AutomaticMigrationDataLossAllowed = true;
+            this.AutomaticMigrationsEnabled = true;
+            this.AutomaticMigrationDataLossAllowed = true;
+        }
+
+        protected override void Seed(TopPost.Data.TopPostDbContext context)
+        {
+
+            if (context.Comments.Any())
+            {
+                return;
+            }
+
+            AddAdmin(context);
+
+            Random rand = new Random();
+
+            List<Category> categories;
+
+            List<Post> posts;
+
+            categories = new List<Category>();
+            categories.Add(new Category() { Name = "Art" });
+            categories.Add(new Category() { Name = "Economy" });
+            categories.Add(new Category() { Name = "Technology" });
+            categories.Add(new Category() { Name = "Education" });
+            categories.Add(new Category() { Name = "Sports" });
+            categories.Add(new Category() { Name = "Science" });
+            categories.Add(new Category() { Name = "Funny" });
+
+            ApplicationUser user = new ApplicationUser() { UserName = "Anonimous" };
+
+            posts = new List<Post>();
+
+            for (int j = 0; j < 10; j++)
+            {
+                for (int i = 1; i < 11; i++)
+                {
+                    posts.Add(new Post()
+                    {
+                        Category = categories[1],
+                        Title = "Title " + (i + (10 * j)),
+                        Description = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&amp.",
+                        Author = user,
+                        Comments = GetSomeComments(user),
+                        ImageUrl = "/images/" + i + ".jpg",
+                        ThumbnailUrl = "/images/thumbnails/" + i + ".jpg"
+                    });
+                }
+            }
+
+            context.Posts.AddOrUpdate(posts.ToArray());
+        }
+
+        private void AddAdmin(TopPost.Data.TopPostDbContext context)
+        {
+            this.userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(context));
+
+            context.Roles.AddOrUpdate(x => x.Name, new IdentityRole(GlobalConstants.AdminRole));
+            context.SaveChanges();
+
+            var adminUser = new ApplicationUser
+            {
+                Email = "admin@gmail.com",
+                UserName = "admin"
+            };
+
+            this.userManager.Create(adminUser, "123456");
+            this.userManager.AddToRole(adminUser.Id, GlobalConstants.AdminRole);
         }
 
         private static List<Comment> GetSomeComments(ApplicationUser user)
@@ -35,54 +106,6 @@ namespace TopPost.Data.Migrations
                     Text = "LoL"
                 }
             };
-        }
-
-        protected override void Seed(TopPost.Data.TopPostDbContext context)
-        {
-            if (context.Comments.Any())
-            {
-                //StaticDataSeeder.SeedUsers(context);
-                //StaticDataSeeder.SeedData(context);
-                return;
-            }
-
-            Random Rand = new Random();
-
-            List<Category> Categories;
-
-            List<Post> Posts;
-
-            Categories = new List<Category>();
-            Categories.Add(new Category() { Name = "Art" });
-            Categories.Add(new Category() { Name = "Economy" });
-            Categories.Add(new Category() { Name = "Technology" });
-            Categories.Add(new Category() { Name = "Education" });
-            Categories.Add(new Category() { Name = "Sports" });
-            Categories.Add(new Category() { Name = "Science" });
-            Categories.Add(new Category() { Name = "Funny" });
-
-            ApplicationUser user = new ApplicationUser() { UserName = "Anonimous" };
-
-            Posts = new List<Post>();
-
-            for (int j = 0; j < 10; j++)
-            {
-                for (int i = 1; i < 11; i++)
-                {
-                    Posts.Add(new Post()
-                    {
-                        Category = Categories[1],
-                        Title = "Title " + (i + 10 * j),
-                        Description = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&amp;amp;amp;#39;s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-                        Author = user,
-                        Comments = GetSomeComments(user),
-                        ImageUrl = "/images/" + i + ".jpg",
-                        ThumbnailUrl = "/images/thumbnails/" + i + ".jpg"
-                    });
-                }
-            }
-
-            context.Posts.AddOrUpdate(Posts.ToArray());
         }
     }
 }

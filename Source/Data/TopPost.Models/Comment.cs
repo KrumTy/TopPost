@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TopPost.Data.Common.Models;
-
-namespace TopPost.Models
+﻿namespace TopPost.Models
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+
+    using TopPost.Data.Common.Models;
+
     public class Comment : DeletableEntity
     {
         private ICollection<Like> likes;
@@ -20,8 +22,13 @@ namespace TopPost.Models
             this.Created = DateTime.Now;
         }
 
+        [Key]
         public int Id { get; set; }
 
+        [Required]
+        [StringLength(300, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 2)]
+        [DataType(DataType.Text)]
+        [Display(Name = "Text Field")]
         public string Text { get; set; }
 
         public DateTime Created { get; set; }

@@ -1,68 +1,114 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using TopPost.Data;
-using TopPost.Data.Common;
-using TopPost.Models;
-using System.Web.Security;
-namespace TopPost.Web.Controllers
+﻿    namespace TopPost.Web.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Web;
+    using System.Web.Mvc;
+    using System.Web.Security;
+
+    using AutoMapper.QueryableExtensions;
+
+    using TopPost.Data;
+    using TopPost.Data.Common;
+    using TopPost.Data.Common.Repositories;
+    using TopPost.Models;
+    using TopPost.Web.ViewModels.Comments;
+    using TopPost.Web.ViewModels.Posts;
+
     public class CommentsController : BaseController
     {
+        private readonly IDeletableEntityRepository<Comment> comments;
+
+        public CommentsController(IDeletableEntityRepository<Comment> comments, ITopPostData data)
+            : base(data)
+        {
+            this.comments = comments;
+        }
+
         // GET: Comments
         public ActionResult Index()
         {
-            return View();
+            return this.View();
         }
 
-        public ActionResult Post(Comment comment)
+        public ActionResult Post(CommentInputModel comment)
         {
-            comment.AuthorId = this.GetUser().Id;
-            this.db.Comments.Add(comment);
-            db.SaveChanges();
+            if (User.Identity.IsAuthenticated)
+            {
+                if (ModelState.IsValid)
+                {
+                    var userId = this.GetUser().Id;
 
-            return RedirectToAction("Show", "Posts", new { id = comment.PostId });
+                    var newComment = new Comment
+                    {
+                        PostId = comment.PostId,
+                        Text = comment.Text, // sanitizer.Sanitize(input.Content),
+                        AuthorId = userId,
+                        ParentCommentId = comment.ParentCommentId
+                    };
+
+                    this.comments.Add(newComment);
+                    this.comments.SaveChanges();
+
+                    return this.GetPostComments(newComment.PostId);
+                }
+
+                return this.PartialView("_SubmitCommentPartial", comment);
+            }
+
+            else return RedirectToAction("Login", "Account");
         }
 
         public ActionResult GetComments(int commentId)
         {
-            var comments = this.db.Comments.Find(commentId).Comments.ToList();
+            var comments = this.comments
+                .Find(commentId)
+                .Comments
+                .AsQueryable()
+                .Project()
+                .To<CommentDetailViewModel>()
+                .ToList();
 
-            return PartialView("_ViewRepliesPartial", comments);
+            return this.PartialView("_ViewRepliesPartial", comments);
         }
 
         public ActionResult GetReplyPartial(int commentId)
         {
-            var comment = this.db.Comments.Find(commentId);
+            var comment = this.comments.Find(commentId);
 
-            return PartialView("_SubmitCommentPartial", comment);
+            CommentInputModel reply = new CommentInputModel()
+            {
+                ParentCommentId = comment.Id,
+                PostId = comment.PostId
+            };
+
+            return this.PartialView("_SubmitCommentPartial", reply);
         }
 
         public ActionResult GetCommentPartial(int postId)
         {
-            var comment = new Comment() { PostId = postId };
+            CommentInputModel reply = new CommentInputModel()
+            {
+                PostId = postId
+            };
 
-            return PartialView("_SubmitCommentPartial", comment);
+            return this.PartialView("_SubmitCommentPartial", reply);
         }
 
-        public ActionResult GetCommentWindow(int postId)
+        public ActionResult GetPostComments(int postId, int take = 30)
         {
-            var comment = new Comment() { PostId = postId };
-
-            return PartialView("_SubmitCommentPartial", comment);
-        }
-
-        public ActionResult GetPostComments(int postId)
-        {
-            var comments = this.db.Comments
+            var comments = this.comments
                 .All()
                 .AsQueryable()
                 .Where(x => x.PostId == postId && x.ParentCommentId == null)
+                .OrderByDescending(p => p.Likes.Where(l => l.Value == true && !l.IsDeleted).Count() - p.Likes.Where(l => l.Value == false && !l.IsDeleted).Count())
+                .Take(take)
+                .Project()
+                .To<CommentDetailViewModel>()
                 .ToList();
 
-            return PartialView("_ViewRepliesPartial", comments);
+            return this.PartialView("_ViewRepliesPartial", comments);
         }
     }
 }

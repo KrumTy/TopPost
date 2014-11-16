@@ -1,0 +1,43 @@
+﻿@model TopPost.Web.ViewModels.Comments.CommentInputModel
+
+@{
+    var options = new AjaxOptions
+                {
+                    InsertionMode = InsertionMode.Replace,
+                    HttpMethod = "GET",
+                    OnSuccess = string.Format("reloadComments({0})", Model.PostId),
+                    UpdateTargetId = "dialogSubComment" //"comments-list-" + Model.PostId
+                };
+}
+
+@using (Ajax.BeginForm("Post", "Comments", FormMethod.Post,
+                    options, new { enctype = "multipart/form-data", @Class = "text-center" }))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.Hidden("PostId", Model.PostId)
+    if (Model.ParentCommentId != null)
+    {
+        @Html.Hidden("ParentCommentId", Model.ParentCommentId)
+    }
+    @*if (Model.Author != null)
+    {
+        @Html.Hidden("ParentCommentId", Model.Id)
+    }*@
+    
+    <div>
+        @Html.LabelFor(m => m.Text)
+    </div>
+    <div>
+        @Html.TextAreaFor(m => m.Text, new { rows = "6", cols = "60", resize = "none" })
+    </div>
+    <div>
+        @Html.ValidationMessageFor(m => m.Text, "", new { @class = "text-danger" })
+    </div>
+
+    <input type="submit" value="Comment" class="btn-default" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

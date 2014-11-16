@@ -1,0 +1,45 @@
+﻿@Ajax.ActionLink("Load more", "Load", "Posts", new { skip = 0 },
+                new AjaxOptions
+                {
+                    InsertionMode = InsertionMode.InsertAfter,
+                    HttpMethod = "GET",
+                    UpdateTargetId = "main-content"
+                }, new { id = "load-more", hidden="hidden" })
+<div id="dialogSubComment" style="text-align:center"></div>
+
+<div id="main-content" class="container text-center"></div>
+
+<script>
+    $(document).ready(function () {
+        $("#load-more").click().attr("href", "/Posts/Load?skip=5");
+    });
+    $(window).scroll(function () {
+        if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+            var postsCount = $('#load-more').attr('href').split('=')[1] | 0;
+            $("#load-more").click().attr("href", "/Posts/Load?skip=" + (parseInt(postsCount) + 5));
+        }
+    });
+
+    function alignPost(evt,postId) {
+        console.log(evt)
+        $(evt).hide();
+        $("#comments-list-" + postId).toggle(300);
+    };
+
+    function hideComments(postId) {
+        var state = $("#align-" + postId).css("display");
+        $("#btn-load-comments-" + postId).toggle();
+        $("#btn-hide-comments-" + postId).toggle();
+        $("#add-comment-" + postId).toggle(1000);
+        if (state === "none") {
+            $("#comments-list-" + postId).toggle(500, function () {
+                $("#align-" + postId).toggle(300);
+            });
+        }
+        else {
+            $("#align-" + postId).toggle(500, function () {
+                $("#comments-list-" + postId).toggle(300);
+            });
+        }
+    }
+</script>

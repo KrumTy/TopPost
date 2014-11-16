@@ -1,8 +1,6 @@
-﻿@model TopPost.Models.Post
+﻿@model TopPost.Web.ViewModels.Posts.PostViewModel
 
-@{
-    ViewBag.Title = "Show";
-}
+
 
 <div>
     @if (Model == null)
@@ -11,62 +9,98 @@
     }
     else
     {
-        <div class="dl-horizontal col-md-6" style="text-align:center">
-            <h2>
-                @Html.DisplayNameFor(model => model.Title):
-                @Html.DisplayFor(model => model.Title)
-            </h2>
-            <div>
-                @Html.ActionLink("Previous", "Show", "Posts", new { id = Model.Id - 1 }, new { @Class = "btn btn-default" })
-                <img src="@Model.ImageUrl" style="max-width:350px;" />
-                @Html.ActionLink("Next", "Show", "Posts", new { id = Model.Id + 1 }, new { @Class = "btn btn-default" })
-                <div id="likes-bar">
-                    @Html.Action("GetLikes", "Likes", new { postId = Model.Id })
+        ViewBag.Title = Model.Title;
+
+        <div class="row text-center">
+
+            <div id="image-content" style="text-align:center; ">
+                <h2>
+                    @Html.DisplayNameFor(model => model.Title):
+                    @Html.DisplayFor(model => model.Title)
+                </h2>
+                <div>
+                    @Html.ActionLink("<", "Show", "Posts", new { id = Model.Id - 1 }, new { @Class = "btn btn-default" })
+                    <span id="gallery">
+                        <a href="@Model.ImageUrl">
+                            <img src="@Model.ImageUrl" style="max-width:350px" alt="image" title="@Model.Title" />
+                        </a>
+                    </span>
+                    @Html.ActionLink(">", "Show", "Posts", new { id = Model.Id + 1 }, new { @Class = "btn btn-default" })
+                    @if (User.Identity.IsAuthenticated)
+                    { @Html.Partial("_VoteMenuPartial", Model.Id)  }
                 </div>
-                
-            </div>
 
-            <b>@Html.DisplayNameFor(model => model.Description)</b>
-            <p>
-                @Html.DisplayFor(model => model.Description)
-            </p>
-            <div>
-                @Html.DisplayNameFor(model => model.Author):
-                @Html.ActionLink((Model.Author != null) ? Model.Author.UserName : "annonymous", "Profiles", "User", new { username = (Model.Author != null) ? Model.Author.UserName : "annonymous" }, null)
-            </div>
+                <b>@Html.DisplayNameFor(model => model.Description)</b>
+                <p>
+                    @Html.DisplayFor(model => model.Description)
+                </p>
+                <div>
+                    @Html.DisplayNameFor(model => model.AuthorName):
+                    @Html.ActionLink((Model.AuthorName != null) ? Model.AuthorName : "annonymous", "Profiles", "User", new { username = (Model.AuthorName != null) ? Model.AuthorName : "annonymous" }, null)
+                </div>
 
-            <div>
-                @Html.DisplayNameFor(model => model.Category)
-                @Html.DisplayFor(model => model.Category.Name)
-            </div>
+                <div>
+                    @Html.DisplayNameFor(model => model.CategoryName)
+                    @Html.DisplayFor(model => model.CategoryName)
+                </div>
 
-            <div>
-                @Html.DisplayNameFor(model => model.Tags):
-                @foreach (var tag in Model.Tags.ToList())
-                {
-                    @Html.ActionLink(tag.Name, "Index", "Tags", new { tagName = tag.Name }, null)
-                    <span>,</span>
-                }
-            </div>
+                <div>
+                    @Html.DisplayNameFor(model => model.Tags):
+                    @foreach (var tag in Model.Tags.ToList())
+                    {
+                        @Html.ActionLink(tag.Name, "Index", "Tags", new { tagName = tag.Name }, null)
+                        <span>,</span>
+                    }
+                </div>
 
-            <div>
-                @Html.DisplayNameFor(model => model.Created)
-                @Html.DisplayFor(model => model.Created)
+                <div>
+                    @Html.DisplayNameFor(model => model.Created)
+                    @Html.DisplayFor(model => model.Created)
+                </div>
+                @Ajax.ActionLink("Comments", "GetPostComments", "Comments", new { postId = Model.Id }, new AjaxOptions
+                        {
+                            InsertionMode = InsertionMode.Replace,
+                            HttpMethod = "GET",
+                            OnComplete = string.Format("hideComments({0})", Model.Id),
+                            UpdateTargetId = "comments-" + Model.Id
+                        }, new { @Class = "btn btn-default", id = "btn-load-comments-" + Model.Id })
             </div>
-        </div>
-        <div class="dl-horizontal col-md-6">
-            @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = Model.Id },
-                new AjaxOptions
-                {
-                    InsertionMode = InsertionMode.Replace,
-                    HttpMethod = "GET",
-                    OnComplete = "showDialogSubComment()",
-                    UpdateTargetId = "dialogSubComment"
-                }, new { @Class = "btn btn-info" })
-
-            <h2>@Html.LabelFor(c => c.Comments):</h2>
-            @Html.Action("GetPostComments", "Comments", new { postId = Model.Id })
-            <div id="dialogSubComment" style="text-align:center"></div>
+            <div id="comments-handler" class="col-lg-offset-6 col-md-5" style="display:none">
+                <div id="dialogSubComment" style="text-align:center"></div>
+                <a id="btn-hide-comments-@Model.Id" class="btn btn-default btn-block" style="display:none" onclick="hideComments(@Model.Id)">Hide</a>
+                @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = Model.Id }, new AjaxOptions { InsertionMode = InsertionMode.Replace, HttpMethod = "GET", OnComplete = "showDialogSubComment()", UpdateTargetId = "dialogSubComment" }, new { @Class = "btn btn-info btn-block" })
+                <div id="comments-@Model.Id">
+                </div>
+            </div>
         </div>
     }
 </div>
+
+<script>
+    function hideComments(postId) {
+        $("#btn-load-comments-" + postId).toggle();
+        $("#align-" + postId).toggle();
+        $("#btn-hide-comments-" + postId).toggle();
+        $("#comments-list-" + postId).toggle(300);
+        $("#comments-handler").toggle(300);
+        $("#image-content").toggleClass("fixed-image")
+    }
+
+    $(document).ready(function () {
+        $("#btn-load-comments").click();
+    })
+
+    $(window).resize(function () {
+        if ($(window).width() < 1200) {
+            $('#image-content').css("position", "relative");
+        } else {
+            $('#image-content').css("position", "fixed");
+        }
+    });
+
+    function alignPost(postId) {
+        $("#comments-list-" + postId).toggle(300);
+    };
+
+   
+</script>
