@@ -1,0 +1,21 @@
+﻿@model IList<TopPost.Web.ViewModels.Posts.PostThumbViewModel>
+
+<div id="sidebar-wrapper">
+    <div class="sidebar-nav">
+        @foreach (var post in Model)
+        {
+            <span class="sidebar-brand">
+                <a href="/Posts/Show/@post.Id">
+                    <img width="58" src="@post.ThumbnailUrl" title="@post.Title" alt="@post.Title" />
+                </a>
+            </span>
+        }
+    </div>
+</div>
+
+<script>
+    $("#menu-toggle").click(function (e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+</script>

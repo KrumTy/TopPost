@@ -1,7 +1,5 @@
 ﻿@model TopPost.Web.ViewModels.Posts.PostViewModel
 
-
-
 <div>
     @if (Model == null)
     {
@@ -56,6 +54,12 @@
                 <div>
                     @Html.DisplayNameFor(model => model.Created)
                     @Html.DisplayFor(model => model.Created)
+                </div>
+                <div>
+                    @if (User.Identity.IsAuthenticated && (@User.Identity.Name == @Model.AuthorName))
+                    {
+                        @Html.ActionLink("Delete", "Delete", "Posts", new { postId = @Model.Id }, new { @Class = "btn btn-default" });
+                    }                    
                 </div>
                 @Ajax.ActionLink("Comments", "GetPostComments", "Comments", new { postId = Model.Id }, new AjaxOptions
                         {

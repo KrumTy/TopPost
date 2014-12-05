@@ -27,15 +27,37 @@
         private ICacheService cache;
 
         public PostsController(ITopPostData data, IDeletableEntityRepository<Post> posts, ICacheService cache)
-            :base(data)
+            : base(data)
         {
             this.posts = posts;
             this.cache = cache;
         }
 
+        [OutputCache(Duration = 60)]
         public ActionResult Load(int skip = 0, int take = 5)
         {
-            var nextPosts = this.posts
+            string type = this.TempData["type"].ToString();
+
+            var date = DateTime.Now.AddDays(-1);
+            int neededVotes = -1;
+            List<PostViewModel> nextPosts;
+
+            if (type == "Front")
+            {
+                neededVotes = 0;
+            }
+            else if (type == "Rising")
+            {
+                neededVotes = 0;
+            }
+            else if (type == "New")
+            {
+                neededVotes = -10;
+            }
+
+            if (type == "Top")
+            {
+                nextPosts = this.posts
                 .All()
                 .OrderByDescending(p => p.Likes.Where(l => l.Value == true && !l.IsDeleted).Count() - p.Likes.Where(l => l.Value == false && !l.IsDeleted).Count())
                 .Skip(skip)
@@ -43,15 +65,34 @@
                 .Project()
                 .To<PostViewModel>()
                 .ToList();
+            }
+            else
+            {
+                nextPosts = this.posts
+                  .All()
+                  //.Where(x => DateTime.Compare(x.Created, date) > 0 && !x.IsDeleted)
+                  .Where(p => p.Likes.Where(l => l.Value == true && !l.IsDeleted).Count() - p.Likes.Where(l => l.Value == false && !l.IsDeleted).Count() > neededVotes)
+                  .OrderByDescending(x => x.Created)
+                  .Skip(skip)
+                  .Take(take)
+                  .Project()
+                  .To<PostViewModel>()
+                  .ToList();
+            }
 
+            this.ViewBag.type = type;
             this.ViewBag.PostsCount = skip + take;
+            this.TempData.Remove("type");
+            this.TempData.Add("type", type);
 
             return this.PartialView("_LoadNextPostsPartial", nextPosts);
         }
 
-        public ActionResult Front()
+        public ActionResult Front(string type = "Front")
         {
             this.ViewBag.lastPostId = 0;
+            this.TempData.Remove("type");
+            this.TempData.Add("type", type);
 
             return this.View();
         }
@@ -203,12 +244,12 @@
                 {
                     return this.db.Posts
                        .All();
-                       //.Select(c => new SelectListItem
-                       //{
-                       //    Value = c.Id.ToString(),
-                       //    Text = c.Name
-                       //})
-                       //.ToList();
+                    //.Select(c => new SelectListItem
+                    //{
+                    //    Value = c.Id.ToString(),
+                    //    Text = c.Name
+                    //})
+                    //.ToList();
                 }); //this.posts.All();
 
             return displayPosts;
@@ -236,6 +277,7 @@
             return this.PartialView("_ViewPostsPartial", posts);
         }
 
+        [ValidateInput(false)] 
         public ActionResult Post(PostInputModel post)
         {
             if (post.file != null && ModelState.IsValid)
@@ -279,6 +321,51 @@
         public ActionResult GetPostPartial()
         {
             return this.PartialView("_PostPartial");
+        }
+
+        public ActionResult GetTopDailyPosts(int take = 40)
+        {
+            var date = DateTime.Now.AddDays(-1);
+
+            return this.PartialView("_TopDailyPosts",
+                this.posts.All()
+                .AsQueryable()
+                .Where(x => DateTime.Compare(x.Created, date) > 0 && !x.IsDeleted)
+                .OrderByDescending(p => p.Likes
+                    .Where(l => l.Value == true && !l.IsDeleted)
+                    .Count() - p.Likes
+                    .Where(l => l.Value == false && !l.IsDeleted)
+                    .Count()).Take(take)
+                .Project()
+                .To<PostThumbViewModel>()
+                .ToList());
+        }
+
+        public ActionResult Delete(int postId)
+        {
+            var post = this.db.Posts.Find(postId);
+            var user = this.UserProfile;
+
+            if (post == null || user.Id != post.AuthorId)
+            {
+                return this.RedirectToAction("Show", "Posts", new { id = postId });
+            }
+
+            foreach (var comment in post.Comments)
+            {
+                this.db.Comments.Delete(comment);
+            }
+
+            foreach (var fav in post.Favorites)
+            {
+                this.db.Favorites.Delete(fav);
+            }
+
+            this.db.Posts.Delete(post.Id);
+
+            this.db.SaveChanges();
+
+            return RedirectToAction("Front");
         }
     }
 }

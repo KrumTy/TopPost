@@ -1,0 +1,16 @@
+﻿@using TopPost.Web.Areas.Administration.Models;
+@using TopPost.Web.Helpers
+@{
+    const string ControllerName = "Categories";
+    ViewBag.Title = ControllerName;
+}
+<h2>@ViewBag.Title</h2>
+@(Html.FullFeaturedGrid<CategoryViewModel>(ControllerName, m => m.Id, cols => {
+    cols.Bound(m => m.Id).Visible(false);
+    cols.Bound(m => m.Name);
+    //cols.Bound(m => m.CreatedOn).Hidden();
+    //cols.Bound(m => m.ModifiedOn).Hidden();
+    //cols.AutoGenerate(true);
+    cols.Command(c => c.Edit());
+    cols.Command(c => c.Destroy());
+}));

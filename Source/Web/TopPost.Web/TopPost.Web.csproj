@@ -213,7 +213,10 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Areas\Administration\AdministrationAreaRegistration.cs" />
     <Compile Include="Areas\Administration\Controllers\AdminController.cs" />
+    <Compile Include="Areas\Administration\Controllers\CategoriesController.cs" />
     <Compile Include="Areas\Administration\Controllers\CommentsAdmController.cs" />
+    <Compile Include="Areas\Administration\Controllers\KendoGridAdministrationController.cs" />
+    <Compile Include="Areas\Administration\Models\CategoryViewModel.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CommentsController.cs" />
@@ -227,6 +230,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\KendoHelpers.cs" />
     <Compile Include="ViewModels\Account\AccountViewModels.cs" />
     <Compile Include="ViewModels\Account\ManageViewModels.cs" />
     <Compile Include="ViewModels\Account\SortingPagingInfo.cs" />
@@ -462,6 +466,7 @@
     <Content Include="Content\kendo\Uniform\sprite.png" />
     <Content Include="Content\kendo\Uniform\sprite_2x.png" />
     <Content Include="Content\PagedList.css" />
+    <Content Include="Content\simple-sidebar.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -482,6 +487,7 @@
     <Content Include="Areas\Administration\Views\CommentsAdm\Details.cshtml" />
     <Content Include="Areas\Administration\Views\CommentsAdm\Edit.cshtml" />
     <Content Include="Areas\Administration\Views\CommentsAdm\Index.cshtml" />
+    <Content Include="Areas\Administration\Views\Categories\Index.cshtml" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Libraries\Kendo.Mvc.dll" />
     <Content Include="Scripts\bootstrap.js" />
@@ -1199,10 +1205,10 @@
     <Content Include="Scripts\kendo\kendo.view.min.js.map" />
     <Content Include="Scripts\kendo\kendo.web.min.js.map" />
     <Content Include="Scripts\kendo\kendo.window.min.js.map" />
+    <Content Include="Views\Posts\_TopDailyPosts.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Areas\Administration\Models\" />
     <Folder Include="images\" />
     <Folder Include="InputModels\" />
     <Folder Include="Models\" />

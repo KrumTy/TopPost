@@ -22,10 +22,10 @@
                         {
                             InsertionMode = InsertionMode.Replace,
                             HttpMethod = "GET",
-                            OnComplete = string.Format("hideComments({0})", post.Id),
+                            OnComplete = string.Format("hideCommentsScroll({0})", post.Id),
                             UpdateTargetId = "comments-" + post.Id
                         }, new { @Class = "btn btn-default  btn-block", id = "btn-load-comments-" + post.Id })
-            <a id="btn-hide-comments-@post.Id" class="btn btn-default btn-block" style="display:none" onclick="hideComments(@post.Id)">Hide Comments</a>
+            <a id="btn-hide-comments-@post.Id" class="btn btn-default btn-block" style="display:none" onclick="hideCommentsScroll(@post.Id)">Hide Comments</a>
         </div>
         <div class="col-md-6">
             @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = post.Id }, new AjaxOptions { InsertionMode = InsertionMode.Replace, HttpMethod = "GET", OnComplete = "showDialogSubComment()", UpdateTargetId = "dialogSubComment" }, new { @Class = "btn btn-info btn-block", id="add-comment-"+post.Id, style="display:none" })

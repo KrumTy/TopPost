@@ -45,7 +45,9 @@
             <input type="submit" value="Filter" class="btn btn-default" />
         </div>
     </div>
-    <div class="pagination-container">
+@Html.Partial("_ViewPostsPartial", Model)
+
+    <div class="pagination-container text-center">
         <ul class="pagination">
             @for (int i = 0; i <= info.PageCount; i++)
             {
@@ -61,7 +63,6 @@
         </ul>
     </div>
 }
-@Html.Partial("_ViewPostsPartial", Model)
 
 <script>
     $(document).ready(function () {

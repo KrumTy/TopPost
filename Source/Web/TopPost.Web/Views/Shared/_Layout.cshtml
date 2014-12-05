@@ -8,7 +8,6 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/modernizr")
     @Styles.Render("~/Content/kendo")
-    @Scripts.Render("~/bundles/my-app")
     @Scripts.Render("~/bundles/jqueryajax")
 
 
@@ -22,15 +21,30 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav top-menu">
                     <li>
-                        @Html.ActionLink("Top Post", "Front", "Posts", new { area = string.Empty }, new { })
+                        <span class="glyphicon glyphicon-th-list" id="menu-toggle">Daily</span>
                     </li>
-                    <li>@Html.ActionLink("View Posts", "All", "Posts", new { area = string.Empty }, new{})</li>
+                    <li>
+                        @Html.ActionLink("Front", "Front", "Posts", new { area = string.Empty, type = "Front" }, new { })
+                    </li>
+                    <li>
+                        @Html.ActionLink("Rising", "Front", "Posts", new { area = string.Empty, type = "Rising" }, new { })
+                    </li>
+                    <li>
+                        @Html.ActionLink("New", "Front", "Posts", new { area = string.Empty, type = "New" }, new { })
+                    </li>
+                    <li>
+                        @Html.ActionLink("Top", "Front", "Posts", new { area = string.Empty, type = "Top" }, new { })
+                    </li>
+                    <li>@Html.ActionLink("View Posts", "All", "Posts", new { area = string.Empty }, new { })</li>
                     @if (User.IsInRole(TopPost.Common.GlobalConstants.AdminRole))
                     {
-                        <li>
-                            Administration
-                            <ul>
-                                <li>@Html.ActionLink("Comments", "Index", "Comments", new { area = "Administration" }, null)</li>
+                        <li class="dropdown">
+                            <a id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
+                                Administration
+                            </a>
+                            
+                            <ul class="dropdown-menu multi-level">
+                                <li>@Html.ActionLink("Comments", "Index", "CommentsAdm", new { area = "Administration" }, null)</li>
                                 <li>@Html.ActionLink("Categories", "Index", "Categories", new { area = "Administration" }, null)</li>
                             </ul>
                         </li>
@@ -40,16 +54,23 @@
             </div>
         </div>
     </div>
-    <div class="container body-content">
+    <div class="body-content wrapper toggled" id="wrapper">
+        @if (!User.IsInRole(TopPost.Common.GlobalConstants.AdminRole))
+        {
+            @Html.Action("GetTopDailyPosts", "Posts")
+        }
         @RenderBody()
     </div>
     @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/my-app")
+
+
     @RenderSection("scripts", required: false)
-    <script>
+    @*<script>
         $(function () {
             $('.top-menu').kendoMenu();
         })
-    </script>
+    </script>*@
 </body>
 </html>

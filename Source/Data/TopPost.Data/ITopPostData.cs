@@ -1,10 +1,13 @@
 ﻿namespace TopPost.Data
 {
+    using System.Data.Entity;
     using TopPost.Data.Common.Repositories;
     using TopPost.Models;
 
     public interface ITopPostData
     {
+        ITopPostDbContext Context { get; }
+
         IDeletableEntityRepository<Post> Posts { get; }
 
         IDeletableEntityRepository<Category> Categories { get; }

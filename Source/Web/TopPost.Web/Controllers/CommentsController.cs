@@ -32,6 +32,8 @@
             return this.View();
         }
 
+        //[HttpPost]
+        [ValidateInput(false)] 
         public ActionResult Post(CommentInputModel comment)
         {
             if (User.Identity.IsAuthenticated)
@@ -109,6 +111,25 @@
                 .ToList();
 
             return this.PartialView("_ViewRepliesPartial", comments);
+        }
+
+        public ActionResult Delete(int commentId)
+        {
+            var comment = this.db.Comments.Find(commentId);
+            var user = this.UserProfile;
+
+            if (comment == null || user.Id != comment.AuthorId)
+            {
+                return RedirectToAction("Front", "Posts", null);
+            }
+
+            comment.Text = "[deleted]";
+
+            this.db.Comments.Update(comment);
+
+            this.db.SaveChanges();
+
+            return this.RedirectToAction("Show", "Posts", new { id = comment.Post.Id });
         }
     }
 }

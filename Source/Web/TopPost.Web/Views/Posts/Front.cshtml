@@ -3,10 +3,12 @@
                 {
                     InsertionMode = InsertionMode.InsertAfter,
                     HttpMethod = "GET",
-                    UpdateTargetId = "main-content"
+                    UpdateTargetId = "main-content",
+                    LoadingElementId = "loading"
                 }, new { id = "load-more", hidden="hidden" })
-<div id="dialogSubComment" style="text-align:center"></div>
 
+<div id="dialogSubComment" style="text-align:center"></div>
+<h2 id="loading">Loading...</h2>
 <div id="main-content" class="container text-center"></div>
 
 <script>
@@ -17,6 +19,7 @@
         if ($(window).scrollTop() == $(document).height() - $(window).height()) {
             var postsCount = $('#load-more').attr('href').split('=')[1] | 0;
             $("#load-more").click().attr("href", "/Posts/Load?skip=" + (parseInt(postsCount) + 5));
+            console.log($(window).scrollTop());
         }
     });
 
@@ -42,4 +45,18 @@
             });
         }
     }
+
+    function hideCommentsScroll(postId) {
+        var state = $("#align-" + postId).css("display");
+        $("#btn-load-comments-" + postId).toggle();
+        $("#btn-hide-comments-" + postId).toggle();
+        $("#add-comment-" + postId).toggle(300);
+        {
+            $("#align-" + postId).toggle(0, function () {
+                $("#comments-list-" + postId).toggle(300);
+            });
+        }
+    }
+
+
 </script>

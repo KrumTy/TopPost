@@ -22,7 +22,6 @@ namespace TopPost.Data.Migrations
 
         protected override void Seed(TopPost.Data.TopPostDbContext context)
         {
-
             if (context.Comments.Any())
             {
                 return;
@@ -32,11 +31,9 @@ namespace TopPost.Data.Migrations
 
             Random rand = new Random();
 
-            List<Category> categories;
-
             List<Post> posts;
 
-            categories = new List<Category>();
+            List<Category> categories = new List<Category>();
             categories.Add(new Category() { Name = "Art" });
             categories.Add(new Category() { Name = "Economy" });
             categories.Add(new Category() { Name = "Technology" });
@@ -45,7 +42,10 @@ namespace TopPost.Data.Migrations
             categories.Add(new Category() { Name = "Science" });
             categories.Add(new Category() { Name = "Funny" });
 
-            ApplicationUser user = new ApplicationUser() { UserName = "Anonimous" };
+            //context.Categories.AddOrUpdate(categories.ToArray());
+            //context.SaveChanges();
+
+            ApplicationUser user = new ApplicationUser() { UserName = "Anonimous" }; // this.context.Users.Fir
 
             posts = new List<Post>();
 

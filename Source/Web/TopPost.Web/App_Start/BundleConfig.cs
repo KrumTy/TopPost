@@ -31,7 +31,8 @@
                         "~/Content/kendo/kendo.metroblack.min.css"));
 
             bundles.Add(new StyleBundle("~/Content/custom").Include(
-                      "~/Content/site.css"));
+                      "~/Content/site.css",
+                      "~/Content/simple-sidebar.css"));
         }
 
         private static void RegisterScripts(BundleCollection bundles)

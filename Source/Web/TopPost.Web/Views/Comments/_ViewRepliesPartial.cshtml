@@ -6,9 +6,9 @@
 
     <div id="@(hasParent ? ("comments-" + Model[0].ParentCommentId) : ("comments-list-" + Model[0].PostId.ToString()))" style="padding:10px; display:none;">
         @*@if (!hasParent && User.Identity.IsAuthenticated)
-        {
-            @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = Model[0].PostId }, new AjaxOptions { InsertionMode = InsertionMode.Replace, HttpMethod = "GET", OnComplete = "showDialogSubComment()", UpdateTargetId = "dialogSubComment" }, new { @Class = "btn btn-info btn-block" })
-        }*@
+            {
+                @Ajax.ActionLink("Comment", "GetCommentPartial", "Comments", new { postId = Model[0].PostId }, new AjaxOptions { InsertionMode = InsertionMode.Replace, HttpMethod = "GET", OnComplete = "showDialogSubComment()", UpdateTargetId = "dialogSubComment" }, new { @Class = "btn btn-info btn-block" })
+            }*@
         @for (int i = 0; i < Model.Count; i++)
         {
             <div id="@Model[i].Id" style="padding-bottom:10px;border-bottom: 1px solid black; border-left: 2px solid black; padding-left:5px;">
@@ -26,6 +26,10 @@
                         UpdateTargetId = "dialogSubComment"
                     }, new { @Class = "label label-success" })
                     }
+                    @if (User.Identity.IsAuthenticated && (@User.Identity.Name == @Model[i].AuthorName))
+                    {
+                        @Html.ActionLink("Delete", "Delete", "Comments", new { commentId = @Model[i].Id }, new { @Class = "label label-danger" });
+                    }
                     @if (Model[i].CommentsCount != 0 && User.Identity.IsAuthenticated)
                     {
                         @Ajax.ActionLink(string.Format("replies ({0})", Model[i].CommentsCount), "GetComments", "Comments", new { commentId = Model[i].Id },
@@ -38,6 +42,7 @@
                         }, new { @Class = "label label-primary", id = string.Format("btn-show-replies-{0}", Model[i].Id) })
                         <a id="btn-hide-replies-@Model[i].Id" onclick="hideShowReplies(@Model[i].Id)" style="display:none" class="label label-default">hide</a>
                     }
+                    
                 </div>
                 <p class="text-info text-left" style="word-wrap: break-word;">@Model[i].Text</p>
 

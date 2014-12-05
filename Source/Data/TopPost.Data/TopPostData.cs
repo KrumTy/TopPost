@@ -2,8 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.Entity;
     using System.Linq;
-
     using TopPost.Data.Common.Models;
     using TopPost.Data.Common.Repositories;
     using TopPost.Models;
@@ -22,6 +22,14 @@
         {
             this.context = context;
             this.repositories = new Dictionary<Type, object>();
+        }
+
+        public ITopPostDbContext Context
+        {
+            get
+            {
+                return this.context;
+            }
         }
 
         public IDeletableEntityRepository<Post> Posts
